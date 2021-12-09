@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="author" content="Barsanti Nicola">
+        	<meta charset="UTF-8">
+		<link rel="stylesheet" type="text/css" href="css/login.css">
+        	<title>MusicMe</title>
+	</head>
+	<body>
+		<div class="container" id="container">
+			<div class="form-container sign-up-container" id="registration-panel">
+				<form action="#">
+					<h1>Create Account</h1>
+					<input type="text" placeholder="Name" />
+					<input type="email" placeholder="Email" />
+					<input type="password" placeholder="Password" />
+					<input type="text" placeholder="Phone Number" />
+					<button id="signUpReq" >Sign Up</button>
+				</form>
+				<form action="#">
+					<h1>Confirm Registration</h1>
+					<span>To confirm the registration of the account</span>
+					<span>Insert the token sent to your phone number</span>
+					<div class="mb-6 text-center">
+  						<div id="otp" class="flex justify-center">
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="first" maxlength="1" />
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="second" maxlength="1" />
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="third" maxlength="1" />
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fourth" maxlength="1" />
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fifth" maxlength="1" />
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="sixth" maxlength="1" />
+  						</div>
+					</div>
+					<div>
+						<button id="signUpUndo" class="undoButton">Undo</button>
+						<button id="signUpConfirm" >Confirm</button>
+					</div>	
+				</form>
+			</div>
+			<div class="form-container sign-in-container" id="login-panel">
+				<form action="#" id="sign-form-panel">
+					<h1>Sign in</h1>
+					<input type="email" placeholder="Email" />
+					<input type="password" placeholder="Password" />
+					<a href="#" id="change-password">Forgot your password?</a>
+					<div>
+						<button id="signUpUndoHidden" class="undoButtonHidden">Undo</button>
+						<button id="signInReq">Sign In</button>
+					</div>	
+				</form>
+				<form action="#">
+					<h1>One Time Password</h1>
+					<span>Insert the OTP sent to your phone</span>
+					<div class="mb-6 text-center">
+  						<div id="otp" class="flex justify-center">
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="first-1" maxlength="1" />
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="second-2" maxlength="1" />
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="third-3" maxlength="1" />
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fourth-4" maxlength="1" />
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fifth-5" maxlength="1" />
+    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="sixth-6" maxlength="1" />
+  						</div>
+					</div>
+					<div>
+						<button id="signInUndo" class="undoButton">Undo</button>
+						<button id="signInConfirm" >Confirm</button>
+					</div>	
+				</form>
+				
+			</div>
+			<div class="overlay-container">
+				<div class="overlay">
+					<div class="overlay-panel overlay-left">
+						<h1>Welcome Back!</h1>
+						<p>To keep connected with us please login with your personal info</p>
+						<button class="ghost" id="signIn">Sign In</button>
+					</div>
+					<div class="overlay-panel overlay-right">
+						<h1>Hello, Friend!</h1>
+						<p>Enter your personal details and start journey with us</p>
+						<button class="ghost" id="signUp">Sign Up</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="js/login.js"></script>
+	</body>
+</html>		
