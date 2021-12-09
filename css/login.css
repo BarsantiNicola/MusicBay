@@ -210,9 +210,9 @@ input {
 }
 
 .overlay {
-	background: #FF416C;
-	background: -webkit-linear-gradient(to right, #FF4B2B, #FF416C);
-	background: linear-gradient(to right, #FF4B2B, #FF416C);
+	background: #2baaff;
+	background: -webkit-linear-gradient(to right, #1175b8, #67b8ee);
+	background: linear-gradient(to right, #1175b8, #67b8ee);
 	background-repeat: no-repeat;
 	background-size: cover;
 	background-position: 0 0;
@@ -276,13 +276,54 @@ input {
 	width: 40px;
 }
 
-@import url('https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css');
+.error-text {
+	width:50%;
+	margin-top: 10px;
+	color: #ec2e2e;
+	font-size:16;
+	text-align: right;
+}
+
+.error-form-text {
+	width:70%;
+
+	margin-top: 10px;
+	color: #ec2e2e;
+	font-size:16;
+	text-align: right;
+}
+
+.password-strength-show{
+	width:50px;
+	margin-top: auto;
+	margin-bottom: auto;
+	display: none;
+}
+
+.form-line{
+	width: 100%;
+	margin-left:0;
+}
+
+.form-line.active-report input{
+	width:60%;
+}
+
+.form-line.active-report .password-strength-show{
+	display:inline;
+}
+
+.form-line input{
+	width:70%;
+}
+
 .form-control {
-  -webkit-transition: none;
-  transition: none;
-  width: 32px;
-  height: 32px;
-  text-align: center
+  width: 37px;
+  height: 37px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16;
+  margin-bottom: 30px;
 }
 
 .form-control:focus {
