@@ -2,78 +2,162 @@
 <html>
 	<head>
 		<meta name="author" content="Barsanti Nicola">
-        	<meta charset="UTF-8">
+    	<meta charset="UTF-8">
 		<link rel="stylesheet" type="text/css" href="css/login.css">
-        	<title>MusicBay</title>
+    	<title>MusicBay</title>
 	</head>
 	<body>
 		<div class="container" id="container">
 			<div class="form-container sign-up-container" id="registration-panel">
 				<form action="#" id="registration-form">
 					<h1>Sign Up</h1>
-					<input type="text" name="username" placeholder="Name" />
-					<input type="text" name="phone" placeholder="Phone Number" />
-					<div class="form-line">
-						<input type="password" name="password" placeholder="Password" />
+					<input autocomplete="off" type="text" name="username" placeholder="Username" />
+					<input autocomplete="off"  type="text" name="phone" placeholder="Phone Number" />
+					<div class="form-line">							
+						<input autocomplete="off" type="password" name="password" placeholder="Password" />
 						<img class="password-strength-show" src="img/strength_1.png" />
 					</div>
-					
-					<input id="passwordRepeater" type="password" name="password-repeat" placeholder="Repeat Password" />
+						
+					<input autocomplete="off" id="passwordRepeater" type="password" name="password-repeat" placeholder="Repeat Password" />
 					<span class="error-form-text">Error</span>
 					<button id="signUpReq" >Sign Up</button>
+				</form>
 
-				</form>
-				<form action="#">
-					<h1>Confirm Registration</h1>
-					<span>To confirm the registration of the account</span>
-					<span>Insert the token sent to your phone number</span>
-					<div class="mb-6 text-center">
-  						<div id="otp" class="flex justify-center" aria-autocomplete="none">
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="first" maxlength="1" />
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="second" maxlength="1" />
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="third" maxlength="1" />
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fourth" maxlength="1" />
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fifth" maxlength="1" />
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="sixth" maxlength="1" />
-  						</div>
-					</div>
-					<div>
-						<button id="signUpUndo" class="undoButton">Undo</button>
-						<button id="signUpConfirm" >Confirm</button>
-					</div>	
-				</form>
-			</div>
+				<div id="otp-right-container">
+					<form action="#" id="otp-form">
+						<h1>OTP Check</h1>
+						<span>An authentication token has been sent to your phone number</span>
+						<span>To authorize the request please insert the authentication token</span>
+						<div class="mb-6 text-center">
+  							<div id="otp" class="flex justify-center" aria-autocomplete="none">
+    							<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="first" maxlength="1" />
+    							<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="second" maxlength="1" />
+    							<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="third" maxlength="1" />
+    							<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fourth" maxlength="1" />
+ 		   						<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fifth" maxlength="1" />
+    							<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="sixth" maxlength="1" />
+  							</div>
+						</div>
+						<div>
+							<button id="signUpUndo" class="undoButton">Undo</button>
+							<button id="signUpConfirm" >Confirm</button>
+						</div>	
+						<span class="error-text">Remain 3 attemps</span>
+					</form>
+					<form action="#" id="captcha-container" class="captcha-box">
+						<h1>Captcha Verification</h1>
+						<table class="captcha-table">
+							<tbody>
+								<tr>
+									<td><img class="captcha_subimg" id="captcha_0_0"></td>
+									<td><img class="captcha_subimg" id="captcha_0_1"></td>
+									<td><img class="captcha_subimg" id="captcha_0_2"></td>
+									<td><img class="captcha_subimg" id="captcha_0_3"></td>
+								</tr>
+								<tr>
+									<td><img class="captcha_subimg" id="captcha_1_0"></td>
+									<td><img class="captcha_subimg" id="captcha_1_1"></td>
+									<td><img class="captcha_subimg" id="captcha_1_2"></td>
+									<td><img class="captcha_subimg" id="captcha_1_3"></td>
+								</tr>
+								<tr>
+									<td><img class="captcha_subimg" id="captcha_2_0"></td>
+									<td><img class="captcha_subimg" id="captcha_2_1"></td>
+									<td><img class="captcha_subimg" id="captcha_2_2"></td>
+									<td><img class="captcha_subimg" id="captcha_2_3"></td>
+								</tr>
+								<tr>
+									<td><img class="captcha_subimg" id="captcha_3_0"></td>
+									<td><img class="captcha_subimg" id="captcha_3_1"></td>
+									<td><img class="captcha_subimg" id="captcha_3_2"></td>
+									<td><img class="captcha_subimg" id="captcha_3_3"></td>
+								</tr>
+							</tbody>
+						</table>
+						<button id="captchaSet" >Check</button>
+					</form>
+				</div>
+			</div>	
 			<div class="form-container sign-in-container" id="login-panel">
-				<form action="#" id="sign-form-panel">
-					<h1>Sign in</h1>
-					<input type="email" name="username" placeholder="Email" />
-					<input type="password" name="password" placeholder="Password" />
-					<a href="#" id="change-password">Forgot your password?</a>
-					<div>
-						<button id="signUpUndoHidden" class="undoButtonHidden">Undo</button>
-						<button id="signInReq">Sign In</button>
-					</div>	
-				</form>
-				<form action="#">
-					<h1>One Time Password</h1>
-					<span>Insert the OTP sent to your phone</span>
-					<div class="mb-6 text-center">
-  						<div id="otp2" class="flex justify-center">
-    							<input class="text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="first-1" maxlength="1" />
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="second-2" maxlength="1" />
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="third-3" maxlength="1" />
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fourth-4" maxlength="1" />
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fifth-5" maxlength="1" />
-    							<input class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="sixth-6" maxlength="1" />
-  						</div>
-					</div>
-					<div>
-						<button id="signInUndo" class="undoButton">Undo</button>
-						<button id="signInConfirm" >Confirm</button>
-					</div>
-					<span class="error-text">Remain 3 attemps</span>	
-				</form>
-				
+				<div id="left-panel">
+					<form action="#" id="sign-form-panel">
+						<h1>Sign in</h1>
+						<input autocomplete="off" type="text" name="username" placeholder="Username" />
+						<input autocomplete="off" type="password" name="password" placeholder="Password" />
+						<a href="#" id="change-password">Forgot your password?</a>
+						<div>
+							<button id="signUpUndoHidden" class="undoButtonHidden">Back</button>
+							<button id="signInReq">Sign In</button>
+						</div>	
+					</form>
+					<form action="#" id="password-form-panel">
+						<h1>Change Password</h1>
+						<input autocomplete="off" type="text" name="username" placeholder="Username" />
+						<div class="form-line">							
+							<input autocomplete="off" type="password" name="password" placeholder="Password" />
+							<img class="password-strength-show" src="img/strength_1.png" />
+						</div>	
+						<input autocomplete="off" id="passwordRepeaterLeft" type="password" name="password-repeat" placeholder="Repeat Password" />
+						<span class="error-form-text">Error</span>
+						<div>
+							<button id="passwordUndoHidden" class="undoButtonHidden">Back</button>
+							<button id="passwordReq">Sign In</button>
+						</div>	
+					</form>
+				</div>
+
+				<div id="otp-left-container">
+					<form action="#" id="otp-left-form">
+						<h1>One Time Password</h1>
+						<span>An authentication token has been sent to your phone number</span>
+						<span>To authorize the request please insert the authentication token</span>
+						<div class="mb-6 text-center">
+  							<div id="otp2" class="flex justify-center">
+    							<input autocomplete="off" class="text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="first-1" maxlength="1" />
+    							<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="second-2" maxlength="1" />
+    							<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="third-3" maxlength="1" />
+    							<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fourth-4" maxlength="1" />
+    							<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="fifth-5" maxlength="1" />
+    							<input autocomplete="off" class="m-2 text-center form-control form-control-solid rounded focus:border-blue-400 focus:shadow-outline" type="text" id="sixth-6" maxlength="1" />
+  							</div>
+						</div>
+						<div>
+							<button id="signInUndo" class="undoButton">Back</button>
+							<button id="signInConfirm" >Confirm</button>
+						</div>
+						<span class="error-text">Remain 3 attemps</span>	
+					</form>
+					<form action="#" id="captcha-left-container" class="captcha-box">
+						<h1>Captcha Verification</h1>
+						<table class="captcha-table">
+							<tr>
+								<td><img class="captcha_subimg" id="captcha_left_0_0" src="img/background.jpg"></td>
+								<td><img class="captcha_subimg" id="captcha_left_0_1"></td>
+								<td><img class="captcha_subimg" id="captcha_left_0_2"></td>
+								<td><img class="captcha_subimg" id="captcha_left_0_3"></td>
+							</tr>
+							<tr>
+								<td><img class="captcha_subimg" id="captcha_left_1_0"></td>
+								<td><img class="captcha_subimg" id="captcha_left_1_1"></td>
+								<td><img class="captcha_subimg" id="captcha_left_1_2"></td>
+								<td><img class="captcha_subimg" id="captcha_left_1_3"></td>
+							</tr>
+							<tr>
+								<td><img class="captcha_subimg" id="captcha_left_2_0"></td>
+								<td><img class="captcha_subimg" id="captcha_left_2_1"></td>
+								<td><img class="captcha_subimg" id="captcha_left_2_2"></td>
+								<td><img class="captcha_subimg" id="captcha_left_2_3"></td>
+							</tr>
+							<tr>
+								<td><img class="captcha_subimg" id="captcha_left_3_0"></td>
+								<td><img class="captcha_subimg" id="captcha_left_3_1"></td>
+								<td><img class="captcha_subimg" id="captcha_left_3_2"></td>
+								<td><img class="captcha_subimg" id="captcha_left_3_3"></td>
+							</tr>
+						</table>
+						<button id="captcha-left-Set" >Check</button>
+					</form>
+				</div>
 			</div>
 			<div class="overlay-container">
 				<div class="overlay">
