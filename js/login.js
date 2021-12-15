@@ -315,10 +315,8 @@ otpCheckButtons.forEach( button => button.addEventListener('click', function(eve
 	let data = otpDataExtraction( side );
 	switch( data['type'] ){
 		case 'login':
-			if( login( data['username'], data['password'], data['otp-id'], data['otp-value'] )){
-				alert("login path correctly tested!");
-				//window.location.href = 'control.html';
-			}
+			if( login( data['username'], data['password'], data['otp-id'], data['otp-value'] ))
+				window.location.href = 'store.html';
 			break;
 		
 		case 'password-change':
