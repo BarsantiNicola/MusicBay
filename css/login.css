@@ -129,9 +129,36 @@ button.ghost {
 }
 
 .captcha-box{
+	display: none;
+
+}
+
+.ready.captcha-box{
 	display: flex;
 	height:100%;
 }
+
+.loading-captcha.ready{
+    display: flex;
+    position: relative;
+	height: 100%;
+}
+
+.loading-captcha{
+	display: none;
+}
+
+.loading-captcha img{
+	width: 250px;
+	height: 250px;
+	margin: auto;
+	display: none;
+}
+
+.loading-captcha img.ready{
+	display: flex;
+}
+
 
 #otp-left-container{
 	background-color: #FFFFFF;

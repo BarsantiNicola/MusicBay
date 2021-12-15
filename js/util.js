@@ -57,7 +57,7 @@ function passwordEvaluation( input, event ){
     
     if( input.value.length == 1 && event.key == 'Backspace' ){  //  empty input => removing the score section
 
-        form.getElementsByTagName("img")[0].src = "img/strength_0.png";
+        form.getElementsByTagName("img")[0].src = "img/strength_1.png";
         form.classList.remove("active-report"); 
 
     }else{
@@ -173,7 +173,7 @@ function cleanPasswordForm(){
 
     //  clean password score
     const form = document.getElementById( 'password-form' ).getElementsByClassName( 'form-line' )[0];
-    form.getElementsByTagName("img")[0].src = "img/strength_0.png";
+    form.getElementsByTagName("img")[0].src = "img/strength_1.png";
     form.classList.remove("active-report"); 
     
 }
@@ -220,7 +220,7 @@ function checkRegistrationForm(){
     if( username == null || password == null || phone == null )   //  if some info missing do nothing
         return null;
     else
-        return { "username": username, "password": password, "phone": phone };
+        return { 'username': username, 'password': password, 'phone': phone, 'type': 'registration' };
 
 }
 
@@ -231,7 +231,7 @@ function cleanRegistrationForm(){
 
     //  clean password score
     const form = document.getElementById( 'registration-form' ).getElementsByClassName( 'form-line' )[0];
-    form.getElementsByTagName("img")[0].src = "img/strength_0.png";
+    form.getElementsByTagName("img")[0].src = "img/strength_1.png";
     form.classList.remove("active-report"); 
 
 }
@@ -263,25 +263,67 @@ function CaptchaLoad(){
 	
 }
 
+//  Requests to the server a new captchas and display the retrieved information
+function loadCaptchaInformation( type ){
+
+    let response = getCaptcha();  //  request the information to the server
+    let identificator = 'captcha_' + type + '_';
+
+    //  insertion of captcha-id information into the captcha form
+    document.getElementById( 'captcha-' + type + '-container' ).querySelectorAll( '.hidden-input' ).forEach( input => {
+        if( input.name == 'captcha-id' ) input.value = response[ 'captcha-id' ];
+    })
+    globalThis.captcha_value = response[ 'captcha-value' ];
+
+    //  displaying the images into the captcha form
+    for( let y = 0; y<4; y++ )
+        for( let x = 0; x<4; x++ )
+            document.getElementById( identificator + y + "_" + x ).src = response['captcha-content'][x+''+y];
+    showCaptchaLoad( false );  //  removing the loading icon
+            
+}
+
 //  Generates the captcha key starting from a captcha_value and a mask to be applied on
 //  Only character corresponding to a 0 value mask will be concatenated to generate the authentication key
 function generateCaptchaValue(){
 
-	let value ="";
-	for( let i = 0; i<globalThis.captcha_mask.length; i++ ) 
-        if( globalThis.captcha_mask[i] == 0 ){      //  more secure removing the selected box not viceversa(higher key value length)
+	let value ='';
+	for( let i = 0; i<globalThis.captcha_mask.length; i++ ){
+        if( globalThis.captcha_mask[i] == 0 )     //  more secure removing the selected box not viceversa(higher key value length)
             value = value + globalThis.captcha_value[i];
-            globalThis.captcha_mask[i] = 0;         //  immediately dropping all the info needed to recover the key[low low low security improval but better]
-        }
+        globalThis.captcha_mask[i] = 0;         //  immediately dropping all the info needed to recover the key[low low low security improval but better]
+    }
     
 	return value;
+}
+
+//  Loads/removes an animation on captcha for loading
+function showCaptchaLoad( state ){
+    if( state == true ){
+        document.querySelectorAll( '.loading-captcha' ).forEach( element => element.classList.add( 'ready' ));
+        document.querySelectorAll( '.captcha-box' ).forEach( element => element.classList.remove( 'ready' ));
+    }else{
+        document.querySelectorAll( '.loading-captcha' ).forEach( element => element.classList.remove( 'ready' )); 
+        document.querySelectorAll( '.captcha-box' ).forEach( element => element.classList.add( 'ready' ));   
+    }
+}
+
+//  Shows/Hides the animation on captcha for loading(preventing to see strange behaviour of flex)
+function unlockCaptchaLoad( state ){
+    if( state == true )
+        document.querySelectorAll( '.loading-captcha' ).forEach( element => element.getElementsByTagName( 'img' )[0].classList.add( 'ready' )); 
+    else
+        document.querySelectorAll( '.loading-captcha' ).forEach( element => element.getElementsByTagName( 'img' )[0].classList.remove( 'ready' ));     
 }
 
 //  Shows the captcha form and inizialize its data
 function showCaptcha( type, data ){
 
     let captchaForm = document.getElementById( 'captcha-' + type + '-container' );
-    
+    globalThis.captcha_mask = new Array(16);
+    for( let i = 0; i<16; i++ )
+        globalThis.captcha_mask[i] = 0;
+
     captchaForm.querySelectorAll( '.hidden-input' ).forEach( input => { 
         switch( input.name ){
 
@@ -315,6 +357,8 @@ function showCaptcha( type, data ){
 //  cleans the captcha form inputs
 function cleanCaptchaForms(){
 
+    showCaptchaLoad( false );
+    unlockCaptchaLoad( false );
 	captcha_value = '';  //  resetting the captcha value
     for( let i = 0; i< captcha_mask.length; i++ ) captcha_mask[i] = 0;  //  resetting captcha_mask
 
@@ -327,6 +371,7 @@ function cleanCaptchaForms(){
     //  resetting stored information
 	document.querySelectorAll( '.captcha-box > .hidden-input' ).forEach( input => input.value = '' );
 
+
 }
 
 ////  OTP form management
@@ -336,6 +381,14 @@ const rightOTPInputs = document.getElementById( 'otp-right' ).querySelectorAll( 
 
 //  store information into the hidden fields of the otp form and show it
 function showOtp( type, data ){
+
+    if( type == 'right' ){
+        if( !registration( data['username'], data['password'], data['phone'], data['captcha-id'], data['captcha-value'])){
+            showPrimaryPanel( type );
+            return;
+        }
+    }
+    let otpId = getOTP( data['username'] );  //  request to the server of an OTP verification
 
     document.getElementById( 'otp-'+type+'-form' ).querySelectorAll( '.hidden-input' ).forEach( input => { 
         switch( input.name ){
@@ -363,6 +416,10 @@ function showOtp( type, data ){
             case 'captcha-value':
                 input.value = data[ 'captcha-value' ];
                 break;    
+            
+            case 'otp-id':
+                input.value = otpId;
+                break;    
 
             default:
                 break;  
@@ -373,6 +430,72 @@ function showOtp( type, data ){
     document.getElementById( 'otp-' + type +'-container' ).classList.add( 'active-otp-form' );  //  enable CSS transition to show OTP form
 
 } 
+
+//  checks all the field of the otp are valid
+function checkOTPpanel( type ){
+
+    let otpInputs = document.getElementById( 'otp-' + type + '-form' ).getElementsByClassName( 'form-control' );
+    for( let input of otpInputs )
+        if( input.value.length != 1 )
+            return false;
+            
+    return true;
+
+}
+//  Extracts the data from the otp form and return it as a dictionary
+function otpDataExtraction( type ){
+
+    let otpForm = document.getElementById( 'otp-'+type+'-form' );
+    let otpInputs = otpForm.getElementsByClassName( 'form-control' );
+    let dataInputs = otpForm.getElementsByClassName( 'hidden-input' );
+	
+	let otpValue = '';
+	let data = {};
+
+    for( let input of otpInputs )
+        otpValue = otpValue + input.value;
+	   
+    data['otp-value'] = otpValue;
+
+    for( let input of dataInputs )
+        switch( input.name ){
+
+            case 'username':
+                data['username'] = input.value;
+                break;
+                
+            case 'password':
+                data['password'] = input.value;
+                break;
+                
+            case 'type':
+                data['type'] = input.value;
+                break;
+            
+            case 'phone':
+                data['phone'] = input.value;
+                break;
+                
+            case 'captcha-id':
+                data['captcha-id'] = input.value;
+                break;
+                
+            case 'captcha-value':
+                data['captcha-value'] = input.value;
+                break;
+                
+            case 'otp-id':
+                data['otp-id'] = input.value;
+                break;
+            
+            default: 
+                break;
+
+        }
+
+    return data;
+
+}
 
 //  cleans the otp form inputs
 function cleanOTPforms(){

@@ -20,10 +20,10 @@ document.addEventListener( 'DOMContentLoaded', function(){
 	cleanLoginForm();
 	cleanPasswordForm();
 	cleanOTPforms();
-	cleanCaptchaForms();
 	PasswordEvaluationLoad();
 	CaptchaLoad();
 	OTPLoad();
+	cleanCaptchaForms();
 
 },  false );
 
@@ -51,11 +51,11 @@ rightLinkOut.addEventListener( 'click', (event) => {
 	if( loginPanel.classList.contains( 'left-panel-active' )){  //  if secondary page displayed
 		
 		showPrimaryPanel( 'left' );     //  moving to the primary page
-		cleanCaptchaForms();            //  clean eventual pendent information on captcha
 		cleanOTPforms();                //  clean eventual pendent information on otp
 
 		sleep(600).then(() => {         //  give some time to conclude the previous animation(changing primary page)
 			container.classList.add( 'right-panel-active' );
+			cleanCaptchaForms();            //  clean eventual pendent information on captcha
 		});
 		
 	}else
@@ -83,11 +83,11 @@ leftLinkOut.addEventListener( 'click', (event) => {
 	if( registrationPanel.classList.contains( 'right-panel-active' )){   //  if secondary page displayed
 		
 		showPrimaryPanel( 'right' );       //  moving to the primary page
-		cleanCaptchaForms();               //  clean eventual pendent information on captcha
 		cleanOTPforms();                   //  clean eventual pendent information on otp
 
 		sleep(600).then(() => {            //  give some time to conclude the previous animation(changing primary page)
     		container.classList.remove( 'right-panel-active' ); //  clean eventual pendent information on registration form
+			cleanCaptchaForms();               //  clean eventual pendent information on captcha
 		});
 		
 	}else
@@ -163,9 +163,12 @@ passwordRequestButton.addEventListener( 'click', (event) => {
 	if( credentials == null )
 		return;
 
+	showCaptchaLoad( true );	          //  preparing captcha loading
 	showCaptcha('left', credentials );    //  show the captcha and set the information for the next stage
 	showSecondaryPanel( 'left' );         //  scroll the page to make the captcha visible
 	cleanPasswordForm();                  //  clean the password form's inputs
+	sleep(250).then( () => unlockCaptchaLoad( true ));    //  showing captcha loading(prevents strange behaviour of flex translation)
+	loadCaptchaInformation( 'left' );
 
 });
 
@@ -224,7 +227,7 @@ captchaChecks.forEach( captcha => captcha.addEventListener( 'click', function( e
 					break;
 
 				case 'captcha-id':
-					data[ 'captchaId' ] = inputs[i].value;
+					data[ 'captcha-id' ] = inputs[i].value;
 					break;	
 
 				default: break;			
@@ -251,8 +254,12 @@ captchaChecks.forEach( captcha => captcha.addEventListener( 'click', function( e
 					break;
 
 				case 'captcha-id':
-					data[ 'captchaId' ] = inputs[i].value;
+					data[ 'captcha-id' ] = inputs[i].value;
 					break;	
+
+				case 'type':
+						data[ 'type' ] = inputs[i].value;
+						break;	
 
 				default: break;			
 			}
@@ -300,8 +307,35 @@ otpCheckButtons.forEach( button => button.addEventListener('click', function(eve
 
 	event.preventDefault();
 
-	let panel = this.parentNode.parentNode.parentNode.parentNode;  //  useful to obtain the side of the page
-	showPrimaryPanel( panel.id.replace( '-panel', ''));            //  display primary page of 'left' or 'right'
+	let side = this.parentNode.parentNode.parentNode.parentNode.id.replace( '-panel', '' ); //  useful to obtain the side of the page
+
+	if( !checkOTPpanel( side ))
+		return;
+
+	let data = otpDataExtraction( side );
+	switch( data['type'] ){
+		case 'login':
+			if( login( data['username'], data['password'], data['otp-id'], data['otp-value'] )){
+				alert("login path correctly tested!");
+				//window.location.href = 'control.html';
+			}
+			break;
+		
+		case 'password-change':
+			if( changePassword( data['username'], data['password'], data['captcha-id'], data['captcha-value'], data['otp-id'], data['otp-value']))
+				alert("Password change path correctly tested!!!");
+			break;
+		
+		case 'registration':
+			if( activateUser( data['username'], data['otp-id'], data['otp-value']))
+				alert("Registration path correcly tested!!!");
+			break;
+		
+		default: break;	
+
+	}
+		
+	showPrimaryPanel( side );            //  display primary page of 'left' or 'right'
 
 	sleep(500).then(() => {    //  giving some time for the form to be hidden by the animation
 		cleanOTPforms();       //  cleaning otp stored information
@@ -332,10 +366,12 @@ signUpRequest.addEventListener('click', (event) => {
 	if( data == null )   //  if inputs are wrong checkRegistrationForm returns null
 		return;
 
+	showCaptchaLoad( true );        //  preparing captcha loading
 	showCaptcha( 'right', data );   //  displaying the captcha on the secondary page
 	showSecondaryPanel( 'right' );  //  moving to the secondary page
 	cleanRegistrationForm();        //  cleaning the registration form inputs
-
+	sleep(520).then( () => unlockCaptchaLoad( true ));   //  showing captcha loading(prevents strange behaviour of flex translation)
+	loadCaptchaInformation( 'right' );
 });
 
 
