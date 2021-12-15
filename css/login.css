@@ -190,9 +190,22 @@ table{
 	border: 5;
 }
   
-tr, th, td {
-	background: linear-gradient(to bottom, rgba(29, 79, 243, 0.1), rgba(55, 154, 235, 0.5));
-	border: 3px solid rgb(0, 60, 128);
+tr, td {
+	background: cornflowerblue;
+	border: 2px solid rgb(7, 112, 233);
+	color: white;
+}
+
+th {
+	background: cornflowerblue;
+	border: 2px solid rgb(7, 112, 233);
+	color: white;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 20px;
+	text-align: left;
+	font-weight: inherit;
+	font-size: unset;
 }
 
 .captcha_subimg{

@@ -274,6 +274,7 @@ function loadCaptchaInformation( type ){
         if( input.name == 'captcha-id' ) input.value = response[ 'captcha-id' ];
     })
     globalThis.captcha_value = response[ 'captcha-value' ];
+    document.getElementById( 'captcha-' + type + '-container' ).getElementsByTagName( 'th' )[0].textContent = response[ 'captcha-clue' ];
 
     //  displaying the images into the captcha form
     for( let y = 0; y<4; y++ )
@@ -323,7 +324,7 @@ function showCaptcha( type, data ){
     globalThis.captcha_mask = new Array(16);
     for( let i = 0; i<16; i++ )
         globalThis.captcha_mask[i] = 0;
-
+  
     captchaForm.querySelectorAll( '.hidden-input' ).forEach( input => { 
         switch( input.name ){
 
@@ -368,6 +369,9 @@ function cleanCaptchaForms(){
 		captcha.src = '';
 	});
 
+    //  resetting captcha tip
+    document.querySelectorAll( 'th' ).forEach( header => header.textContent = '' );
+    
     //  resetting stored information
 	document.querySelectorAll( '.captcha-box > .hidden-input' ).forEach( input => input.value = '' );
 
