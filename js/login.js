@@ -1,117 +1,357 @@
-const signUpButton = document.getElementById('signUp');                  //  button for registration form transition
-const signInButton = document.getElementById('signIn');                  //  button for login form transition
-const signUpButtonReq = document.getElementById('signUpReq');            //  button for registration form request
-const signInButtonReq = document.getElementById('signInReq'); 		 //  button for login form request
-const signUpButtonConfirm = document.getElementById('signUpConfirm');    //  button for login request OTP confirmation
-const signInButtonConfirm = document.getElementById('signInConfirm');    //  button for registration request OTP confirmation
-const signUpButtonUndo = document.getElementById('signUpUndo');          //  button for login request undo
-const signInButtonUndo = document.getElementById('signInUndo');          //  button for registration request undo
-const passwordButtonUndo = document.getElementById('signUpUndoHidden');
-const container = document.getElementById('container');                  //  forms container
-const loginPanel = document.getElementById('login-panel');               //  login forms container
-const loginFormPanel = document.getElementById('sign-form-panel');
-const registrationPanel = document.getElementById('registration-panel'); //  registration forms container
-const passwordButton = document.getElementById('change-password');
+const signUpButtonReq = document.getElementById('signUpReq');     //  button for registration form request
+const container = document.getElementById('container');           //  forms container
+const loginPanel = document.getElementById('left-panel');         //  login forms container
+const registrationPanel = document.getElementById('right-panel'); //  registration forms container
 
-//  wait function for animation improve
+
+//  FILE CONTAINING THE CONTROL FLOW OF THE LOGIN PAGE(reaction for buttons, page reactions)
+//  ALL THE USED FUNCTIONS ARE STORED INFO THE utils.js, crypto.js AND connection.js FILES
+
+//  wait function for animation improvement
 function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-function setToPasswordChange(){
-	loginFormPanel.getElementsByTagName("h1")[0].innerHTML = "Change Password";
-	loginFormPanel.getElementsByTagName("button")[0].textContent = "Change It";
-	loginFormPanel.getElementsByTagName("a")[0].style.display = "none";
-	loginFormPanel.getElementsByTagName("button")[0].style.display = "inline";
-}
+////  [PAGE LOADING]
 
-function setToLoginChange(){
-	loginFormPanel.getElementsByTagName("h1")[0].innerHTML = "Sign In";
-	loginFormPanel.getElementsByTagName("button")[0].textContent = "Sign In";
-	loginFormPanel.getElementsByTagName("a")[0].style.display = "inline";
-	loginFormPanel.getElementsByTagName("button")[0].style.display = "none";
-}
+document.addEventListener( 'DOMContentLoaded', function(){
 
-//  PAGE LOADING
-
-document.addEventListener('DOMContentLoaded', function(){ 
-	OTPLoad();
+	cleanRegistrationForm();
+	cleanLoginForm();
+	cleanPasswordForm();
+	cleanOTPforms();
+	cleanCaptchaForms();
 	PasswordEvaluationLoad();
-	signUpClear();
-	OTPClear();
-}, false);
+	CaptchaLoad();
+	OTPLoad();
 
-//  BUTTONS REACTIONS
+},  false );
 
-signUpButton.addEventListener('click', () => {
-	if( loginPanel.classList.contains("login-panel-active")){
+
+////  [PAGE FLOW]
+////  Control flow between the sections of the page
+
+
+//   MAIN PAGE CONTROL LINKS
+
+const leftLinkOut = document.getElementById( 'left-linkout' );     //  button for moving from the left-page side to the right one
+const rightLinkOut = document.getElementById( 'right-linkout' );   //  button for moving from the right-page side to the left one 
+
+////  Moves to the right side of the page when displaying the left side
+//
+//  Launch Domain: Registration Form, Left OTP form, Left Captcha Form
+//  Actions: 
+//            - if showing secondary page moves to the primary page
+//            - clean secondary page
+//            - traslation to left side
+rightLinkOut.addEventListener( 'click', (event) => {
+
+	event.preventDefault();	
+
+	if( loginPanel.classList.contains( 'left-panel-active' )){  //  if secondary page displayed
 		
-		loginPanel.classList.remove("login-panel-active");
-		sleep(600).then(() => {
-			container.classList.add("right-panel-active");
+		showPrimaryPanel( 'left' );     //  moving to the primary page
+		cleanCaptchaForms();            //  clean eventual pendent information on captcha
+		cleanOTPforms();                //  clean eventual pendent information on otp
+
+		sleep(600).then(() => {         //  give some time to conclude the previous animation(changing primary page)
+			container.classList.add( 'right-panel-active' );
 		});
 		
 	}else
-		container.classList.add("right-panel-active");
+		container.classList.add( 'right-panel-active' );
 	
+	sleep(1500).then(()=>{  //  give some time to complete the animation(preventing user to see code activity)
+		cleanLoginForm();     //  cleaning eventual login information
+		cleanPasswordForm();  //  cleaning eventual password change information	
+		setToLogin();         //  resetting the page to login(user maybe was seeing password change form)
+	})
+
 });
 
-signInButton.addEventListener('click', () => {
-	setToLoginChange();
-	if( registrationPanel.classList.contains("registration-panel-active")){
+////  Moves to the left side of the page when displaying the right side
+//
+//  Launch Domain: Login Form, Password Change Form, Right OTP form, Right Captcha Form
+//  Actions: 
+//            - if showing secondary page moves to the primary page
+//            - clean secondary page
+//            - traslation to right side
+leftLinkOut.addEventListener( 'click', (event) => {
+
+	event.preventDefault();	
 	
-		registrationPanel.classList.remove("registration-panel-active");
-		sleep(600).then(() => {
-    			container.classList.remove("right-panel-active");
+	if( registrationPanel.classList.contains( 'right-panel-active' )){   //  if secondary page displayed
+		
+		showPrimaryPanel( 'right' );       //  moving to the primary page
+		cleanCaptchaForms();               //  clean eventual pendent information on captcha
+		cleanOTPforms();                   //  clean eventual pendent information on otp
+
+		sleep(600).then(() => {            //  give some time to conclude the previous animation(changing primary page)
+    		container.classList.remove( 'right-panel-active' ); //  clean eventual pendent information on registration form
 		});
 		
 	}else
-		container.classList.remove("right-panel-active");
-	
+		container.classList.remove( 'right-panel-active' );	
+
+	sleep(1500).then(() => {               //  give some time to complete the animation(preventing user to see code activity)
+		cleanRegistrationForm();
+	})	
 });
 
-signInButtonUndo.addEventListener('click', () => {
-	loginPanel.classList.remove("login-panel-active");
-});
 
-signUpButtonUndo.addEventListener('click', () => {
-	registrationPanel.classList.remove("registration-panel-active");
-});
+//   SIGN-IN FORM CONTROL FLOW
 
-signUpButtonReq.addEventListener('click', (event) => {
-	if(signUpCheck())
-		registrationPanel.classList.add("registration-panel-active");	
+const signInLinkOut = document.getElementById( 'signIn-linkout' );  	//  button for submit login -> OTP form
+const passwordLinkOut = document.getElementById( 'password-linkout' );  //  button for moving to the change password page -> Change Password Form
+
+////  Click on Login Submit form
+//
+//  Launch Domain: Login Form
+//  Actions:
+//  		  - checks login information[username,password]
+//  		  - execute hash on [password]
+//  		  - move to otp form
+//  		  - clean login form
+signInLinkOut.addEventListener( 'click', (event) => {
+
 	event.preventDefault();
+	let credentials = checkLoginForm(); //  returns [username, password_hash, 'login'] in case all information valid
+
+	if( credentials == null )
+		return;
+
+	showOtp( 'left', credentials );  //  otp configuration(request of OTP + show form)
+	showSecondaryPanel( 'left' );    //  move page to print OTP(OPT loading in background)
+	cleanLoginForm();		         //  clean login form inputs
+
 });
 
-signInButtonReq.addEventListener('click', () => {
-	loginPanel.classList.add("login-panel-active");
+////  Click on Forget password button
+// 
+//   Launch Domain: Login Form
+//   Actions:
+//			  - changes displayed form to password form
+//            - clean login form 
+passwordLinkOut.addEventListener( 'click', (event) => {
+
+	event.preventDefault();
+	setToPassword();          //  change the displayed page to the password change one
+	cleanLoginForm();         //  clean login form inputs 
+
 });
 
-signUpButtonConfirm.addEventListener('click', () => {
-	registrationPanel.classList.remove("registration-panel-active");
+
+//   PASSWORD FORM CONTROL FLOW
+
+const passwordRequestButton = document.getElementById( 'password-request' );   //  button for request password change
+const passwordBackButton = document.getElementById( 'password-back' );     //  button for undo password change
+
+////   Click on Request on the Password Form
+//
+//   Launch Domain: Password Change Form
+//   Actions:
+//			   - checks password form information[username,password]
+//			   - execute hash on password
+//             - set captcha form on secondary page
+//			   - move to captcha form
+passwordRequestButton.addEventListener( 'click', (event) => {
+
+	event.preventDefault();
+
+	let credentials = checkPasswordForm();   //  get credentials from the form and check them. In case of invalid credentials returns null
+
+	if( credentials == null )
+		return;
+
+	showCaptcha('left', credentials );    //  show the captcha and set the information for the next stage
+	showSecondaryPanel( 'left' );         //  scroll the page to make the captcha visible
+	cleanPasswordForm();                  //  clean the password form's inputs
+
 });
 
-signInButtonConfirm.addEventListener('click', () => {
-	loginPanel.classList.remove("login-panel-active");
+////   Click on Back Button on the Password Form
+//
+//   Launch Domain: Password Change Form
+//   Actions:
+//			   - move to login form
+//             - clean password form
+passwordBackButton.addEventListener( 'click', (event) => {
+
+	event.preventDefault();
+
+	setToLogin();              //  set the displayed page to the login one
+	cleanPasswordForm();       //  clean the password form's inputs
+
 });
 
-passwordButton.addEventListener('click', () => {
-	setToPasswordChange();
+
+//   CAPTCHA FORMs CONTROL FLOW
+
+const captchaChecks= document.querySelectorAll( '.captcha-check' );   //  check buttons of both the captcha forms
+
+////   Click on Check Button on the Captcha Form
+//
+//   Launch Domain: Left Captcha Form, Right Captcha Form
+//   Actions:
+//             - set previous info into otp form
+//             - set captcha code into otp form
+//             - clean stored information
+//             - move to otp form
+//             - clean captcha form
+captchaChecks.forEach( captcha => captcha.addEventListener( 'click', function( event ){
+
+	event.preventDefault();
+	let data = {};
+	data[ 'captcha-value' ] = generateCaptchaValue();   //  extraction of captcha code	
+
+	if( this.parentNode.classList.contains( 'left' )){  //  captcha on left page
+
+		//  information extraction from hidden inputes
+		const inputs = document.getElementById( 'captcha-left-container' ).querySelectorAll( '.hidden-input' );
+		for( let i = 0; i<inputs.length; i++ )
+			switch( inputs[i].name ){
+
+				case 'username': 
+					data[ 'username' ] = inputs[i].value;
+					break;
+
+				case 'password':
+					data[ 'password' ] = inputs[i].value;
+					break;
+
+				case 'type':
+					data[ 'type' ] = inputs[i].value;
+					break;
+
+				case 'captcha-id':
+					data[ 'captchaId' ] = inputs[i].value;
+					break;	
+
+				default: break;			
+			}
+			showOtp( 'left', data );  //  loading extracted information into otp form and page change
+
+	}else{	  //  captcha on right page
+  
+		//  information extraction from hidden inputes
+		const inputs = document.getElementById( 'captcha-right-container' ).querySelectorAll( '.hidden-input' );
+		for( let i = 0; i<inputs.length; i++ )
+			switch( inputs[i].name ){
+
+				case 'username': 
+					data[ 'username' ] = inputs[i].value;
+					break;
+
+				case 'password':
+					data[ 'password' ] = inputs[i].value;
+					break;
+
+				case 'phone':
+					data[ 'phone' ] = inputs[i].value;
+					break;
+
+				case 'captcha-id':
+					data[ 'captchaId' ] = inputs[i].value;
+					break;	
+
+				default: break;			
+			}
+			showOtp( 'right', data );  //  loading extracted information into otp form and page change
+			
+	}
+	cleanCaptchaForms();
+	
+}));
+
+
+//   OTP FORMs CONTROL FLOW
+
+const otpUndoButtons =  document.querySelectorAll( '.undo-otp-button' );    // OTP undo buttons[both OTP forms] 
+const otpCheckButtons = document.querySelectorAll( '.check-otp-button' );   // OTP Check buttons[both OTP forms]
+
+////   Click on Undo Button on the OTP Forms
+//
+//   Launch Domain: Left OTP Form, Right OTP Form
+//   Actions:
+//             - clean stored information
+//             - move to primary panel
+otpUndoButtons.forEach( button => button.addEventListener('click', function(event){
+
+	event.preventDefault();
+
+	let panel = this.parentNode.parentNode.parentNode.parentNode;  //  useful to obtain the side of the page
+	showPrimaryPanel( panel.id.replace( '-panel', ''));            //  display primary page of 'left' or 'right'
+
+	sleep(500).then(() => {   //  giving some time for the form to be hidden by the animation
+		cleanOTPforms();      //  cleaning otp stored information
+	});
+
+}));
+
+////   Click on Confirm Button on the OTP Forms
+//
+//   Launch Domain: Left OTP Form, Right OTP Form
+//   Actions:
+//             - get stored information
+//             - clean stored information
+//             - make request to the web-server
+//             - move to primary panel
+otpCheckButtons.forEach( button => button.addEventListener('click', function(event){
+
+	event.preventDefault();
+
+	let panel = this.parentNode.parentNode.parentNode.parentNode;  //  useful to obtain the side of the page
+	showPrimaryPanel( panel.id.replace( '-panel', ''));            //  display primary page of 'left' or 'right'
+
+	sleep(500).then(() => {    //  giving some time for the form to be hidden by the animation
+		cleanOTPforms();       //  cleaning otp stored information
+	});
+
+}));
+
+
+//   SIGNUP FORM CONTROL FLOW
+
+const signUpRequest = document.getElementById( 'sign-up-request' );
+
+////   Click on SignUp Button on the Registration From
+//
+//   Launch Domain: SignUp Form
+//   Actions:
+//             - check registration form
+//             - copy information on captcha form
+//             - show captcha form
+//             - show secondary page
+//             - clean registration form
+signUpRequest.addEventListener('click', (event) => {
+	
+	event.preventDefault();
+
+	let data = checkRegistrationForm();   //  extraction and checking of the registration form inputs
+
+	if( data == null )   //  if inputs are wrong checkRegistrationForm returns null
+		return;
+
+	showCaptcha( 'right', data );   //  displaying the captcha on the secondary page
+	showSecondaryPanel( 'right' );  //  moving to the secondary page
+	cleanRegistrationForm();        //  cleaning the registration form inputs
+
 });
 
-passwordButtonUndo.addEventListener('click', () => {
-	setToLoginChange();
-});
 
+////  BUTTONS AND FUNCTIONALITIES LOAD MANAGEMENT
 
 //  OTP MANAGEMENT
 
-//  Function for OTP input management. Launches a set of listeners for each digit of the OTP input
-//  Permits to check the input and realize the overall behavior of the OTP presentation
-//
-//     - inputs: the list of input elements composing the OTP
-//
+////  General function to load OTP input management on all the page's inputs
+function OTPLoad(){
+
+	launchSingleOTP( document.querySelectorAll( '#otp-left > *[id]' ));  //  login/password_change OTP input
+	launchSingleOTP( document.querySelectorAll( '#otp-right > *[id]' )); //  registration OTP input
+
+}
+
+//  Function to load OTP management on form's inputs
 function launchSingleOTP( inputs ){
 
 	for( let i = 0; i < inputs.length; i++ ){
@@ -122,7 +362,7 @@ function launchSingleOTP( inputs ){
     	inputs[i].addEventListener( 'keydown', function( event ){
 	
 			//  DEL button for moving left on the OTP removing data
-      		if( event.key === "Backspace" ) {
+      		if( event.key === 'Backspace' ) {
 
         		inputs[i].value = '';
         		if( i > 0 )  
@@ -150,37 +390,43 @@ function launchSingleOTP( inputs ){
 	}
 }
 
-function OTPClear(){
 
-	document.querySelectorAll( '#otp > *[id]' ).forEach( elem => elem.value = '' )
-	document.querySelectorAll( '#otp2 > *[id]' ).forEach( elem => elem.value = '' )
+////  PASSWORD EVALUATION 
 
-}
-
-function OTPLoad(){
-
-	launchSingleOTP( document.querySelectorAll( '#otp > *[id]' ));  //  login/password_change OTP input
-	launchSingleOTP( document.querySelectorAll( '#otp2 > *[id]' )); //  registration OTP input
-
-}
-
+//  General function to load Password Protection Analysis on all the involved inputs
 function PasswordEvaluationLoad(){
-	
-	const inputs = document.getElementById("registration-form").querySelectorAll('input');
-	for( let i = 0; i < inputs.length; i++ ){
-		if( inputs[i].name == "password")
-			inputs[i].addEventListener('keydown', function(event){
 
+	singlePasswordEvaluationLoad( document.getElementById( 'registration-form' ).querySelectorAll( 'input' ), 1 );
+	singlePasswordEvaluationLoad( document.getElementById( 'password-form' ).querySelectorAll( 'input' ), 0 );
+
+}
+
+//  Function to start listener for input and password analysis from an input using zxcvbn
+function singlePasswordEvaluationLoad(inputs, type){
+
+	for( let i = 0; i < inputs.length; i++ ){
+
+		if( inputs[i].name == "password")
+			inputs[i].addEventListener('keydown', function( event ){
+
+				// input management(delete current input and move backward on the inputs)
 				if( event.key === "Backspace" && inputs[i].value == '' && i>0 ){
 					inputs[i-1].focus();
 					event.preventDefault();
 					return;
-				}
-				passwordEvaluation(inputs[i]);	
-				if( event.key === "Enter" ){
-					if( i == inputs.length -1 )
-						signUpButtonReq.focus();
-					else
+				}else
+					if( event.key === "Backspace" )  //  just deleting input, leaving the management to event.default
+						return;
+
+				passwordEvaluation( inputs[i], event );  //  checking password with zxcvbn
+
+				if( event.key === "Enter" ){  //  input management(move forward on inputs or on the button)
+					if( i == inputs.length -1 ){
+						if( type == 0 )
+							passwordRequestButton.focus();
+						else
+							signUpButtonReq.focus();
+					}else
 						inputs[i+1].focus();
 
 					event.preventDefault();
@@ -190,18 +436,23 @@ function PasswordEvaluationLoad(){
 			});
 		else	
 			inputs[i].addEventListener('keydown', function(event){
+
+				// input management(delete current input and move backward on the inputs)
 				if( event.key === "Backspace" && inputs[i].value == '' && i>0 ){
 					inputs[i-1].focus();
 					event.preventDefault();
 					return;
 				}else
-					if( event.key === "Backspace" )
+					if( event.key === "Backspace" )  //  just deleting input, leaving the management to event.default
 						return;
 
-				if( event.key === "Enter" ){
-					if( i == inputs.length -1 )
+				if( event.key === "Enter" ){  //  input management(move forward on inputs or on the button)
+					if( i == inputs.length -1 ){
+						if( type == 0 )
+							passwordRequestButton.focus();
+						else
 						signUpButtonReq.focus();
-					else
+					}else
 						inputs[i+1].focus();	
 					event.preventDefault();
 					return;
@@ -213,55 +464,5 @@ function PasswordEvaluationLoad(){
 	}
 }
 
-function passwordEvaluation( input ){
-
-	const form = document.getElementById("registration-form");
-	let score = zxcvbn(input.value).score;
-	score = score == 0 ? score+1: score;
-	form.getElementsByTagName("img")[0].src = "img/strength_"+score+".png";
-	form.getElementsByClassName("form-line")[0].classList.add("active-report");
-
-}
-
-function signUpClear(){
-	document.getElementById("registration-form").querySelectorAll('input').forEach( input => input.value = '' );
-}
-
-function onlyNumberCheck(event){
-	return event.keyCode > 47 && event.keyCode < 58;
-}
-
-function usernameCheck(event){
-	return event.keyCode > 32 && event.keyCode < 128;
-}
-
-function signUpCheck(){
-	const inputs = document.getElementById("registration-form").querySelectorAll('input');
-	const passwordRepeated = document.getElementById("passwordRepeater").value;
-
-	for( let i = 0; i<inputs.length; i++ ){
-		if( inputs[i].value.length == 0 ) return false;
-		switch( inputs[i].name ){
-			case "password":
-				if( inputs[i].value != passwordRepeated ){
-					//  SET ERROR ON PAGE
-					return false;
-				}
-				break;
-
-			case "phone":
-				let number = inputs[i].value;
-				if( number.length != 10 || number[0]!='3'){
-					//  SET ERROR ON PAGE
-					return false;
-				}	
-				break;
-			default:
-				break;	
-		}
-	}
-	return true;
-
-}
 
 

@@ -15,12 +15,14 @@ body {
 	height: 100vh;
 	margin: -20px 0 10px;
 	background-image: url(../img/background.jpg);
+	background-repeat: no-repeat;
+	background-size:cover;
 }
 
 h1 {
 	font-weight: bold;
 	margin: 0;
-	margin-bottom:20px;
+	margin-bottom:40px;
 }
 
 h2 {
@@ -59,7 +61,12 @@ button {
 	transition: transform 80ms ease-in;
 }
 
-.undoButton {
+.mb-6{
+	margin-top: 20px;
+}
+
+
+.undo-otp-button{
 	border-radius: 20px;
 	border: 1px solid #B7B7B7;
 	background-color: #B7B7B7;
@@ -72,11 +79,10 @@ button {
 	transition: transform 80ms ease-in;
 }
 
-.undoButtonHidden {
+.password-back-button{
 	border-radius: 20px;
 	border: 1px solid #B7B7B7;
 	background-color: #B7B7B7;
-	display: none;
 	color: #FFFFFF;
 	font-size: 12px;
 	font-weight: bold;
@@ -99,6 +105,89 @@ button.ghost {
 	border-color: #FFFFFF;
 }
 
+#otp-right-container{
+	background-color: #FFFFFF;
+	padding:0;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	margin-right:0;
+	position:relative;
+	text-align: center;
+}
+
+#otp-right-form{
+	display:none;
+}
+
+#otp-right-container.active-otp-form #otp-right-form{
+	display:flex;
+}
+
+#otp-right-container.active-otp-form .captcha-box{
+	display: none;
+}
+
+.captcha-box{
+	display: flex;
+	height:100%;
+}
+
+#otp-left-container{
+	background-color: #FFFFFF;
+	padding:0;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	margin-right:0;
+	position:relative;
+	text-align: center;
+}
+
+#otp-left-form{
+	display:none;
+}
+
+#otp-left-container.active-otp-form #otp-left-form{
+	display:flex;
+}
+
+#otp-left-container.active-otp-form .captcha-box{
+	display: none;
+}
+
+
+table{
+	margin-bottom:20px;
+	border-radius: 10pt;
+	border: 5;
+}
+  
+tr, th, td {
+	background: linear-gradient(to bottom, rgba(29, 79, 243, 0.1), rgba(55, 154, 235, 0.5));
+	border: 3px solid rgb(0, 60, 128);
+}
+
+.captcha_subimg{
+	width:100px;
+	height: 100px;
+	padding: 3px;
+	position:relative;
+	display:block;
+	top:0;
+	left:0;
+	z-index:2;
+}
+
+.captcha_subimg.active-captcha{
+	opacity: 0.4;
+	background: #2baaff;
+	background: -webkit-linear-gradient(to right, #1175b8, #67b8ee);
+	background: linear-gradient(to right, #1175b8, #67b8ee);
+	border-color: #FFFFFF;
+}
+
+
 form {
 	background-color: #FFFFFF;
 	display: flex;
@@ -107,6 +196,7 @@ form {
 	flex-direction: column;
 	padding: 0 50px;
 	height: 100%;
+	width: 100%;
 	text-align: center;
 }
 
@@ -121,6 +211,7 @@ input {
 .container {
 	background-color: #fff;
 	border-radius: 10px;
+	margin: auto;
   	box-shadow: 0 14px 28px rgba(0,0,0,0.25), 
 			0 10px 10px rgba(0,0,0,0.22);
 	position: relative;
@@ -130,6 +221,29 @@ input {
 	min-height: 650px;
 }
 
+#password-form{
+	display: none;
+}
+
+#left-panel.password-panel-active #password-form{
+	display: flex;
+}
+
+#left-panel.password-panel-active #login-form{
+	display: none;
+}
+
+#login-panel{
+	background-color: #FFFFFF;
+	padding:0;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	margin-right:0;
+	position:relative;
+	text-align: center;
+
+}
 .form-container {
 	position: absolute;
 	top: 0;
@@ -159,26 +273,18 @@ input {
 	transform: translateX(100%);
 	opacity: 1;
 	z-index: 5;
-	animation: show 0.6s;
+	animation: show 0.4s;
 }
 
-#registration-panel {
-}
-
-#registration-panel.registration-panel-active {
+#right-panel.right-panel-active {
 	transform: translateY(-100%);
 	left: 50%;
 	z-index:6;
 	animation: show 0.1s;
 }
 
-#login-panel {
-	display: inline;
-}
-
-#login-panel.login-panel-active {
+#left-panel.left-panel-active{
 	transform: translateY(-100%);
-	z-index:6;
 	animation: show 0.1s;
 }
 
@@ -288,6 +394,7 @@ input {
 	width:70%;
 
 	margin-top: 10px;
+	margin-bottom: 10px;
 	color: #ec2e2e;
 	font-size:16;
 	text-align: right;
@@ -306,7 +413,7 @@ input {
 }
 
 .form-line.active-report input{
-	width:60%;
+	width:59%;
 }
 
 .form-line.active-report .password-strength-show{
@@ -348,4 +455,7 @@ input {
   border-color: #EBEDF3;
   color: #3F4254;
   transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+#otp-form{
+	display: none;
 }
