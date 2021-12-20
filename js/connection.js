@@ -34,6 +34,12 @@ function getOTP( username ){
     return 'asdj02ednasd01223';
 }
 
+//  Request an OTP check to the server, username is not necessary cause is known by the server. 
+//  The server will reply with an OTP identificator(like a requestID but to identify OTPs requests)
+function getUnnamedOTP(){
+    return 'asdj02ednasd01223';
+}
+
 //  Check user credentials to perform access to the store
 function login( username, passwordHash, otpID, otpValue ){
     return otpID == 'asdj02ednasd01223' && otpValue == '123456';
@@ -53,4 +59,31 @@ function activateUser( username, otpID, otpValue ){
 //  Change the user's password
 function changePassword( username, passwordHash, captchaID, captchaValue, otpID, otpValue ){
     return captchaID == 'as0ad9j01asdna0d123AFnda5s' && captchaValue == 'nQKwEa091xtA' && otpID == 'asdj02ednasd01223' && otpValue == '123456';
+}
+
+//  Retrieves songslist data from the server
+//  Request:
+//
+//  Reponse:
+//          {
+//              'type': 'search',
+//              'selection': 'all',
+//              'filter': 'miku',
+//              'page': 0,
+//              'data':[{   
+//                          'songID': 1237891,        
+//                          'title':  'Churirà',
+//                          'author': 'Hatsune Miku',
+//                          'album':  'Miku4U',
+//                          'demo' :  'demos/asdonais.mp3',
+//                          'price':  '1.99$'
+//                      },{...
+//               }]    
+//          }
+function getData( type, selection, filter, page ){
+}
+
+//  Ma
+function buySong( songID, ccn, cvv, name, surname, expire, otpID, otpValue ){
+    return true;
 }
