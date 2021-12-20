@@ -31,7 +31,7 @@ header{
     height: 15vw;
     min-height:200px;
     width: 100%;
-    background-image: url(../img/test.jpg);
+    background-image: url(../img/store-background.jpg);
 	background-repeat: no-repeat;
 	background-size:cover;
 }
@@ -145,12 +145,6 @@ i.fa-times-circle:hover{
     font-size: 35px;
 }
 
-.filter-container{
-    display: inline;
-    height: 100%;
-
-}
-
 /* STORE PANEL COMPONENTS STYLESHEETS */
 
 @keyframes left-out {
@@ -174,9 +168,10 @@ i.fa-times-circle:hover{
     overflow-y: hidden;
 }
 
-.filter-container{
-    width: 20%;
+#filter-container{
+    width: 60%;
     height: 100%;
+    display: inline;
 }
 
 /* [LOADER PANEL] */
@@ -305,7 +300,6 @@ i.fa-times-circle:hover{
     background-color:rgb(51, 51, 51);
     border: 2px solid white;
     color: white;
-	background-image: url(../img/background.jpg);
 	background-repeat: no-repeat;
 	background-size:cover;
 }
@@ -318,7 +312,7 @@ i.fa-times-circle:hover{
     display: grid;
     grid-template-rows: 25px 25px;
     grid-template-columns: 83px 83px 83px;
-    margin-top: 99px;
+    margin-top: 95px;
     margin-bottom: 3px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
@@ -385,6 +379,11 @@ audio{
 .label-song-price{
     margin-left: 40px;
 
+}
+
+.song-info .download-button{
+    width: 80px;
+    margin-left: 40px;
 }
 
 /* [PAYMENT POPUP] */

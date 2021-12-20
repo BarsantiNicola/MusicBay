@@ -64,26 +64,29 @@ function changePassword( username, passwordHash, captchaID, captchaValue, otpID,
 //  Retrieves songslist data from the server
 //  Request:
 //
-//  Reponse:
-//          {
-//              'type': 'search',
-//              'selection': 'all',
-//              'filter': 'miku',
-//              'page': 0,
-//              'data':[{   
-//                          'songID': 1237891,        
-//                          'title':  'Churirà',
-//                          'author': 'Hatsune Miku',
-//                          'album':  'Miku4U',
-//                          'demo' :  'demos/asdonais.mp3',
-//                          'price':  '1.99$'
-//                      },{...
-//               }]    
-//          }
+//  Reponse: [{   
+//               'songID': 1237891,        
+//               'title':  'Churirà',
+//               'author': 'Hatsune Miku',
+//               'album':  'Miku4U',
+//               'demo' :  'demos/asdonais.mp3',
+//               'price':  '1.99$'
+//             },{...
+//
+//           }]    
 function getData( type, selection, filter, page ){
+    return [{ 'songID': '123','title': 'test', 'artist':'artist', 'album':'album', 'price': '10$', 'song': '', 'img':'img/background.jpg'}];
 }
 
 //  Ma
 function buySong( songID, ccn, cvv, name, surname, expire, otpID, otpValue ){
-    return true;
+    return otpID == 'asdj02ednasd01223' && otpValue == '123456';
+}
+
+function downloadSong( songID ){
+    alert("downloading start");
+}
+
+function disconnect(){
+    alert('disconnecting');
 }

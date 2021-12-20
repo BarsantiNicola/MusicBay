@@ -70,25 +70,23 @@
         </div>
         <div class="container">
             <div class="header-panel">
-                <i class="fa fa-home"></i>
-                <form class="filter-container">
-                    <select>
+                <i id="home-search" class="fa fa-home"></i>
+                <form id="filter-container">
+                    <select class='input-filter'>
                         <option value="songs">All</option>
                         <option value="artists">Artists</option>
                         <option value="most-buyed">Most Buyed</option>
                     </select>
                     <label>
                         Search
-                        <input type="text">
-                        <i class="fa fa-search"></i>
+                        <input class='input-filter' type="text">
+                        <i id="filtred-search" class="fa fa-search"></i>
                         
                     </label>
 
                 </form>
                 <div class="logout">
-                    <a href=index.html><i class="fa fa-times-circle"></i></a>  
-                    
-                     
+                    <a id="exit-button" href=index.html><i class="fa fa-times-circle"></i></a>  
                 </div>
 
             </div>
@@ -110,33 +108,14 @@
                 </div>
 
                 <div class="music-box">
-                    <i class="fa fa-arrow-left"></i>
+                    <i id="left-arrow" class="fa fa-arrow-left"></i>
                     <div id="music-container">
-                        <div class="song-box">
-                            <div class="song-info">
-                               <label class="label-song-title">Title:<span class="song-title">Churira</span></label>
-                               <label class="label-song-artist">Artist:<span class="song-artist">Churira</span></label>
-                               <label class="label-song-album">Album:<span class="song-album">Churira</span></label>
-                               <div class="label-song-music">
-                                    <audio controls autoplay>
-                                        Your browser does not support the audio element.
-                                    </audio>
-                                </div>
-
-                               <button id="buy-button">Buy</button> 
-                               <label class="label-song-price"><span class="song-price">5$</span></label>
-
-                            </div>
-                        </div>
-                        <div class="song-box"></div>
-                        <div class="song-box"></div>
-                        <div class="song-box"></div>
-                        <div class="song-box"></div>
-                        <div class="song-box"></div>
-                        <div class="song-box"></div>
-                        <div class="song-box"></div>
+                        <input class="hidden-input" type="hidden" name="page" id="page-num" value='0'>
+                        <input class="hidden-input" type="hidden" name="selection">
+                        <input class="hidden-input" type="hidden" name="type">
+                        <input class="hidden-input" type="hidden" name="filter">
                     </div>
-                    <i class="fa fa-arrow-right"></i>
+                    <i id="right-arrow" class="fa fa-arrow-right"></i>
                 </div>
             </div>
         </div>
