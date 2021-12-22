@@ -294,7 +294,7 @@ function loadSongs( page, songs ){
     else
         document.getElementById( 'left-arrow' ).style.opacity = 1;
 
-    songs.forEach( song => addSong( song['songID'], song['title'], song['artist'], song['album'], song['price'], song['song'], song['img'] ));
+    songs.forEach( song => addSong( song['songID'], song['title'], song['artist'],  song['price'], song['song'], song['img'] ));
 
 }
 
@@ -311,15 +311,14 @@ function loadSongs( page, songs ){
 //      <button class="buy-button">Buy</button>
 //      <label class="label-song-price"><span class="song-price">10$</span></label>
 //  </div>
-function addSong( songID, title, artist, album, songPrice, song, img ){
+function addSong( songID, title, artist, songPrice, song, img ){
 
     let songBox = document.createElement( 'div' );
     songBox.classList.add( 'song-box' );
-    songBox.style.backgroundImage = 'url(' + img + ')';
+    songBox.style.backgroundImage = 'url( ' + img + ')';
 
     let songInfo = document.createElement( 'div' );
     songInfo.classList.add( 'song-info' );
-
     let songMusic = document.createElement( 'div' );
     songMusic.classList.add( 'label-song-music' );
 
@@ -357,13 +356,9 @@ function addSong( songID, title, artist, album, songPrice, song, img ){
                 classType = 'song-artist';
                 content = artist;
                 contentLabel = 'Artist:';
-                break;
-                
-            case 2:
-                classType = 'song-album';
-                content = album;
-                contentLabel = 'Album:';
-                break;    
+                break; 
+            case 3:
+                    
         }
         span.textContent = content;
         span.classList.add( classType );
@@ -374,7 +369,7 @@ function addSong( songID, title, artist, album, songPrice, song, img ){
 
     }
 
-    songMusic.innerHTML = '<audio controls autoplay>Your browser does not support the audio element</audio>';
+    songMusic.innerHTML = '<audio controls>Your browser does not support the audio element</audio>';
     songMusic.getElementsByTagName( 'audio' )[0].src = song;
     songInfo.appendChild( songMusic );
 

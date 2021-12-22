@@ -20,10 +20,10 @@ function getCaptcha(){
             'captcha-value': 'dnQK2wEas0912xtA',
             'captcha-clue' : 'Check first column',
             'captcha-content': { 
-                                    '00': 'captcha/test00.jpg', '10': 'captcha/test10.jpg', '20': 'captcha/test11.jpg', '30': 'captcha/test30.jpg',
-                                    '01': 'captcha/test00.jpg', '11': 'captcha/test10.jpg', '21': 'captcha/test11.jpg', '31': 'captcha/test30.jpg',
-                                    '02': 'captcha/test00.jpg', '12': 'captcha/test10.jpg', '22': 'captcha/test11.jpg', '32': 'captcha/test30.jpg',
-                                    '03': 'captcha/test00.jpg', '13': 'captcha/test10.jpg', '23': 'captcha/test11.jpg', '33': 'captcha/test30.jpg',
+                                    '00': 'captcha/axmaAsNDslasddsa00.jpg', '10': 'captcha/axmaAsNDslasddsa10.jpg', '20': 'captcha/axmaAsNDslasddsa20.jpg', '30': 'captcha/axmaAsNDslasddsa30.jpg',
+                                    '01': 'captcha/axmaAsNDslasddsa01.jpg', '11': 'captcha/axmaAsNDslasddsa11.jpg', '21': 'captcha/axmaAsNDslasddsa21.jpg', '31': 'captcha/axmaAsNDslasddsa31.jpg',
+                                    '02': 'captcha/axmaAsNDslasddsa02.jpg', '12': 'captcha/axmaAsNDslasddsa12.jpg', '22': 'captcha/axmaAsNDslasddsa22.jpg', '32': 'captcha/axmaAsNDslasddsa32.jpg',
+                                    '03': 'captcha/axmaAsNDslasddsa03.jpg', '13': 'captcha/axmaAsNDslasddsa13.jpg', '23': 'captcha/axmaAsNDslasddsa23.jpg', '33': 'captcha/axmaAsNDslasddsa33.jpg',
             }
         };
 }
@@ -75,7 +75,7 @@ function changePassword( username, passwordHash, captchaID, captchaValue, otpID,
 //
 //           }]    
 function getData( type, selection, filter, page ){
-    return [{ 'songID': '123','title': 'test', 'artist':'artist', 'album':'album', 'price': '10$', 'song': '', 'img':'img/background.jpg'}];
+    return [{ 'songID': '123','title': 'Hand in Hand', 'artist':'Hatsune Miku', 'price': '0.99$', 'song': 'demo/hand-in-hand.mp3', 'img':"pics/hand-in-hand.jpg"}];
 }
 
 //  Ma
