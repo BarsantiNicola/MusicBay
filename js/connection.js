@@ -14,6 +14,18 @@
 //                                    '03': 'captcha/test00.jpg', '13': 'captcha/test10.jpg', '23': 'captcha/test11.jpg', '33': 'captcha/test30.jpg',
 //            }
 function getCaptcha(){
+
+    $.ajax({
+        type: "GET",
+        url: 'weblogic/captcha.php',
+        success: function(data){
+        console.log(data);
+        },
+        error: function(xhr, status, error){
+        console.error(xhr);
+        }
+       });
+
     let wait = new Promise((resolve) => setTimeout(resolve, 5000 ));
     return { 
             'captcha-id': 'as0ad9j01asdna0d123AFnda5s',
