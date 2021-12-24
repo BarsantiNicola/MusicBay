@@ -294,7 +294,6 @@ function generateCaptchaValue(){
             value = value + globalThis.captcha_value[i];
         globalThis.captcha_mask[i] = 0;         //  immediately dropping all the info needed to recover the key[low low low security improval but better]
     }
-    
 	return value;
 }
 

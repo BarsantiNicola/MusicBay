@@ -11,7 +11,7 @@
 //                                    '00': 'captcha/test00.jpg', '10': 'captcha/test10.jpg', '20': 'captcha/test11.jpg', '30': 'captcha/test30.jpg',
 //                                    '01': 'captcha/test00.jpg', '11': 'captcha/test10.jpg', '21': 'captcha/test11.jpg', '31': 'captcha/test30.jpg',
 //                                    '02': 'captcha/test00.jpg', '12': 'captcha/test10.jpg', '22': 'captcha/test11.jpg', '32': 'captcha/test30.jpg',
-//                                    '03': 'captcha/test00.jpg', '13': 'captcha/test10.jpg', '23': 'captcha/test11.jpg', '33': 'captcha/test30.jpg',
+//                                    '03': 'captcha/test00.jpg', '13': 'captcha/test10.jpg', '23': 'captcha/test11.jpg', '33': 'captcha/test30.jpg'
 //            }
 function getCaptcha(){
 
@@ -31,11 +31,11 @@ function getCaptcha(){
             'captcha-id': 'as0ad9j01asdna0d123AFnda5s',
             'captcha-value': 'dnQK2wEas0912xtA',
             'captcha-clue' : 'Check first column',
-            'captcha-content': { 
-                                    '00': 'captcha/axmaAsNDslasddsa00.jpg', '10': 'captcha/axmaAsNDslasddsa10.jpg', '20': 'captcha/axmaAsNDslasddsa20.jpg', '30': 'captcha/axmaAsNDslasddsa30.jpg',
-                                    '01': 'captcha/axmaAsNDslasddsa01.jpg', '11': 'captcha/axmaAsNDslasddsa11.jpg', '21': 'captcha/axmaAsNDslasddsa21.jpg', '31': 'captcha/axmaAsNDslasddsa31.jpg',
-                                    '02': 'captcha/axmaAsNDslasddsa02.jpg', '12': 'captcha/axmaAsNDslasddsa12.jpg', '22': 'captcha/axmaAsNDslasddsa22.jpg', '32': 'captcha/axmaAsNDslasddsa32.jpg',
-                                    '03': 'captcha/axmaAsNDslasddsa03.jpg', '13': 'captcha/axmaAsNDslasddsa13.jpg', '23': 'captcha/axmaAsNDslasddsa23.jpg', '33': 'captcha/axmaAsNDslasddsa33.jpg',
+            'captcha-content': {       
+                                    '00': 'captcha/uYflWPkwugjJtEix00.jpg', '10': 'captcha/uYflWPkwugjJtEix10.jpg', '20': 'captcha/uYflWPkwugjJtEix20.jpg', '30': 'captcha/uYflWPkwugjJtEix30.jpg', 
+                                    '01': 'captcha/uYflWPkwugjJtEix01.jpg', '11': 'captcha/uYflWPkwugjJtEix11.jpg', '21': 'captcha/uYflWPkwugjJtEix21.jpg', '31': 'captcha/uYflWPkwugjJtEix31.jpg', 
+                                    '02': 'captcha/uYflWPkwugjJtEix02.jpg', '12': 'captcha/uYflWPkwugjJtEix12.jpg', '22': 'captcha/uYflWPkwugjJtEix22.jpg', '32': 'captcha/uYflWPkwugjJtEix32.jpg', 
+                                    '03': 'captcha/uYflWPkwugjJtEix03.jpg', '13': 'captcha/uYflWPkwugjJtEix13.jpg', '23': 'captcha/uYflWPkwugjJtEix23.jpg', '33': 'captcha/uYflWPkwugjJtEix33.jpg', 
             }
         };
 }
