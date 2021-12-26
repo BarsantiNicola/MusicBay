@@ -266,21 +266,8 @@ function CaptchaLoad(){
 //  Requests to the server a new captchas and display the retrieved information
 function loadCaptchaInformation( type ){
 
-    let response = getCaptcha();  //  request the information to the server
-    let identificator = 'captcha_' + type + '_';
+    getCaptcha( type );  //  request the information to the server
 
-    //  insertion of captcha-id information into the captcha form
-    document.getElementById( 'captcha-' + type + '-container' ).querySelectorAll( '.hidden-input' ).forEach( input => {
-        if( input.name == 'captcha-id' ) input.value = response[ 'captcha-id' ];
-    })
-    globalThis.captcha_value = response[ 'captcha-value' ];
-    document.getElementById( 'captcha-' + type + '-container' ).getElementsByTagName( 'th' )[0].textContent = response[ 'captcha-clue' ];
-
-    //  displaying the images into the captcha form
-    for( let y = 0; y<4; y++ )
-        for( let x = 0; x<4; x++ )
-            document.getElementById( identificator + y + "_" + x ).src = response['captcha-content'][x+''+y];
-    showCaptchaLoad( false );  //  removing the loading icon
             
 }
 

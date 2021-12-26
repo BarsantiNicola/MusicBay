@@ -13,31 +13,37 @@
 //                                    '02': 'captcha/test00.jpg', '12': 'captcha/test10.jpg', '22': 'captcha/test11.jpg', '32': 'captcha/test30.jpg',
 //                                    '03': 'captcha/test00.jpg', '13': 'captcha/test10.jpg', '23': 'captcha/test11.jpg', '33': 'captcha/test30.jpg'
 //            }
-function getCaptcha(){
+function getCaptcha( type ){
 
     $.ajax({
+
         type: "GET",
-        url: 'weblogic/captcha.php',
+        url: 'php/captcha_logic.php',
+
         success: function(data){
-        console.log(data);
+
+            let response = JSON.parse(data.substr(1));
+            let identificator = 'captcha_' + type + '_';
+
+            //  insertion of captcha-id information into the captcha form
+            document.getElementById( 'captcha-' + type + '-container' ).querySelectorAll( '.hidden-input' ).forEach( input => {
+                if( input.name == 'captcha-id' ) input.value = response[ 'captcha-id' ];
+            })
+            globalThis.captcha_value = response[ 'captcha-value' ];
+            document.getElementById( 'captcha-' + type + '-container' ).getElementsByTagName( 'th' )[0].textContent = response[ 'captcha-clue' ];
+
+            //  displaying the images into the captcha form
+            for( let y = 0; y<4; y++ )
+                for( let x = 0; x<4; x++ )
+                    document.getElementById( identificator + y + "_" + x ).src = response['captcha-content'][x+''+y];
+            showCaptchaLoad( false );  //  removing the loading icon
+
         },
         error: function(xhr, status, error){
-        console.error(xhr);
+            console.error(xhr);
         }
        });
 
-    let wait = new Promise((resolve) => setTimeout(resolve, 5000 ));
-    return { 
-            'captcha-id': 'as0ad9j01asdna0d123AFnda5s',
-            'captcha-value': 'dnQK2wEas0912xtA',
-            'captcha-clue' : 'Check first column',
-            'captcha-content': {       
-                                    '00': 'captcha/uYflWPkwugjJtEix00.jpg', '10': 'captcha/uYflWPkwugjJtEix10.jpg', '20': 'captcha/uYflWPkwugjJtEix20.jpg', '30': 'captcha/uYflWPkwugjJtEix30.jpg', 
-                                    '01': 'captcha/uYflWPkwugjJtEix01.jpg', '11': 'captcha/uYflWPkwugjJtEix11.jpg', '21': 'captcha/uYflWPkwugjJtEix21.jpg', '31': 'captcha/uYflWPkwugjJtEix31.jpg', 
-                                    '02': 'captcha/uYflWPkwugjJtEix02.jpg', '12': 'captcha/uYflWPkwugjJtEix12.jpg', '22': 'captcha/uYflWPkwugjJtEix22.jpg', '32': 'captcha/uYflWPkwugjJtEix32.jpg', 
-                                    '03': 'captcha/uYflWPkwugjJtEix03.jpg', '13': 'captcha/uYflWPkwugjJtEix13.jpg', '23': 'captcha/uYflWPkwugjJtEix23.jpg', '33': 'captcha/uYflWPkwugjJtEix33.jpg', 
-            }
-        };
 }
 
 //  Request an OTP check to the server for the given username. The server will reply with an 
