@@ -1,0 +1,7 @@
+{
+    "db": "musicbay",
+    "user": "root",
+    "password": "root",
+    "captcha_path" : "../captcha/",
+    "music_path" : "../music/"
+}
