@@ -249,10 +249,10 @@ class sqlconnector{
     }
 
     //  Adds a song to the user archive by registering his payment
-    public function addPayment( $userID, $musicID, $price ): bool{
+    public function addPayment( $transactionID, $userID, $musicID, $price ): bool{
 
-        $stmt = $this->connection->prepare( "INSERT INTO purchases VALUES( NULL, ?,?,?, DEFAULT )" );
-        $stmt->bind_param( "iis", $userID, $musicID, $price );
+        $stmt = $this->connection->prepare( "INSERT INTO purchases VALUES( NULL, ?,?,?, DEFAULT, ? )" );
+        $stmt->bind_param( "iiss", $userID, $musicID, $price, $transactionID );
 
         $result = $stmt->execute();
 
@@ -262,21 +262,20 @@ class sqlconnector{
     }
 
     //  Retrieves music to be displayed
-    public function getMusic( $userID, $filter, $genre, $page ): array
-    {
+    public function getMusic( $type, $userID, $filter, $genre, $page ): array{
 
         $page *= 8;   //  songs grouped by pages containing 8 elements
 
-        if( $userID != null ){   //  search into the user purchased songs
+        if( $type == 'default_search' ){   //  search into the user purchased songs
 
             $stmt = $this->connection->prepare(
 
-                "SELECT musicid, title, artist, music.song, pic 
+                "SELECT musicid, title, artist, music.song, pic, null
                        FROM purchases INNER JOIN music ON purchases.song = music.musicid 
-                       WHERE purchases.user = ?"
+                       WHERE purchases.user = ? LIMIT ?,8"
 
             );
-            $stmt->bind_param( "i", $userID );
+            $stmt->bind_param( "ii", $userID, $page );
 
         }else {  //  search into the songs collection
 
@@ -286,60 +285,65 @@ class sqlconnector{
 
                     $stmt = $this->connection->prepare(
 
-                        "SELECT musicid, title, artist, song, pic 
-                               FROM music LIMIT ? 8"
+                        "SELECT musicid, title, artist, song, pic, price 
+                               FROM music WHERE musicid NOT IN ( select song from purchases where user=? ) LIMIT ?,8"
 
                     );
-                    $stmt->bind_param("i", $page);
+                    $stmt->bind_param("ii", $userID, $page );
 
                 }else{   //  filter not applied, genre applied
 
                     $stmt = $this->connection->prepare(
 
-                        "SELECT musicid, title, artist, song, pic 
+                        "SELECT musicid, title, artist, song, pic , price
                                FROM music 
-                               WHERE genre = ? LIMIT ? 8"
+                               WHERE genre = ? AND musicid NOT IN ( select song from purchases where user=? ) LIMIT ?,8"
 
                     );
-                    $stmt->bind_param("si", $genre, $page );
+                    $stmt->bind_param("sii", $genre, $userID, $page );
 
                 }
 
             } else {
 
+                $filter = '%' . $filter . '%';
                 if( $genre == null ){  //  filter applied, genre not applied
 
                     $stmt = $this->connection->prepare(
-                        "SELECT musicid, title, artist, song, pic 
+                        "SELECT musicid, title, artist, song, pic, price 
                            FROM music
-                           WHERE title LIKE ? OR artist LIKE ? LIMIT ? 8" );
-                    $stmt->bind_param("ssi", $filter, $filter, $page);
+                           WHERE title LIKE ? OR artist LIKE ? AND musicid NOT IN ( select song from purchases where user=? ) LIMIT ?,8"
+                    );
+                    $stmt->bind_param("ssii", $filter, $filter, $userID, $page);
 
                 }else{
 
                     $stmt = $this->connection->prepare(
-                        "SELECT musicid, title, artist, song, pic 
+                        "SELECT musicid, title, artist, song, pic, price 
                            FROM music
-                           WHERE title LIKE ? OR artist LIKE ? AND genre = ? LIMIT ? 8" );
-                    $stmt->bind_param("sssi", $filter, $filter, $genre, $page );
+                           WHERE title LIKE ? OR artist LIKE ? AND genre = ? AND musicid NOT IN ( select song from purchases where user=? ) LIMIT ?,8"
+                    );
+                    $stmt->bind_param("sssii", $filter, $filter, $genre, $userID, $page );
 
                 }
 
             }
         }
-
         $data = [];
         if( $stmt->execute() ){
 
-            $stmt->bind_result( $musicID, $title, $artist, $song, $pic );
-            while( $stmt->fetch())
+            $stmt->bind_result( $musicID, $title, $artist, $song, $pic, $price );
+            while( $stmt->fetch()) {
+
                 $data[] = [
-                    'song-id' => $musicID,
+                    'songID' => $musicID,
                     'title' => $title,
                     'artist' => $artist,
-                    'demo' => $song,
-                    'pic' => $pic
+                    'price' => $price,
+                    'song' => $song,
+                    'img' => $pic
                 ];
+            }
         }
 
         $stmt->close();
@@ -347,6 +351,38 @@ class sqlconnector{
 
     }
 
+    /**
+     * Gets detailed information of a song given its id(used by cart management)
+     * @throws LogException In case the songID isn't present inside the database
+     */
+    public function getSongInfo(int $songID ): array{
+
+        $title = null;
+        $artist = null;
+        $price = null;
+        $musicid = null;
+        $stmt = $this->connection->prepare( "SELECT musicid, title, artist, price FROM music WHERE musicid = ?" );
+        $stmt->bind_param( "i", $songID );
+
+        if( $stmt->execute() ){
+
+            $stmt->bind_result( $musicid, $title, $artist, $price );
+            $stmt->fetch();
+
+        }
+
+        $stmt->close();
+        if( $title == null || strlen($title) == 0 )
+            throw new LogException(
+                [ 'INTERNAL ERROR' ],
+                'SQL-CONNECTOR',
+                1,
+                'Invalid songID request. Song ' . $songID . ' not present'
+            );
+
+        return [ "song-id" => $musicid, "title" => $title, "artist" => $artist, "price" => $price ];
+
+    }
     /**
      * Retrieves the phone number associated with a user
      * @param string $username Name of the username to which change the password

@@ -4,7 +4,7 @@
     <?php
     session_start();
     if( isset( $_SESSION[ 'user-id' ]))
-        header('Location: ' . 'store.html', true, 301 );
+        header('Location: ' . 'store.php', true, 301 );
     ?>
     <meta name="author" content="Barsanti Nicola">
     <meta charset="UTF-8">
@@ -21,11 +21,11 @@
             <input autocomplete="off" type="text" pattern="[A-Za-z0-9]{8,30}" name="username" placeholder="Username" />
             <input autocomplete="off"  type="text" pattern="[0-9]{10}" name="phone" placeholder="Phone Number" />
             <div class="form-line">
-                <input autocomplete="new-password" type="password" pattern="{8,30}" name="password" placeholder="Password" />
+                <input autocomplete="new-password" type="password"  pattern="^[\s\S]{8,30}" name="password" placeholder="Password" />
                 <img class="password-strength-show" src="img/strength_1.png" />
             </div>
 
-            <input autocomplete="off" id="passwordRepeater" type="password" pattern="{8,30}"  name="password-repeat" placeholder="Repeat Password" />
+            <input autocomplete="off" id="passwordRepeater" type="password"  pattern="^[\s\S]{8,30}"  name="password-repeat" placeholder="Repeat Password" />
             <button id="sign-up-request" >Sign Up</button>
             <p id="registration-show" class="response-show"></p>
         </form>

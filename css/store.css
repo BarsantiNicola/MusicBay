@@ -73,7 +73,7 @@ button.ghost {
 
 .header-panel{
     width:100%;
-    height: 45px;
+    height: 70px;
     min-width:1200px;
     display: grid;
     grid-template-columns: 80px 600px auto;
@@ -90,14 +90,15 @@ button.ghost {
 .header-panel .logout{
     text-align: right;
     padding-right: 1%;
-    padding-top: 7px;
+    padding-top: 10px;
 
 }
 
 .header-panel label{
-    width: min-content;
-    font-size: 10px;
+    width: max-content;
+    font-size: 20px;
     margin-top: 15px;
+    margin-left: 20px;
 }
 
 .header-panel input{
@@ -105,19 +106,19 @@ button.ghost {
     width: 150px;
     margin-left: 8px;
     margin-right: 5px;
-    font-size: 9px;
+    font-size: 14px;
 }
 
 .header-panel select{
-    font-size: 10px;
-    margin-top: 10px;
+    font-size: 20px;
+    margin-top: 18px;
 }
 
 i.fa-home{
-    font-size: 30px;
-    padding-left:10%;
-    padding-top: 6px;
-    color:rgb(4, 109, 122);
+    font-size: 45px;
+    padding-left: 10%;
+    padding-top: 12px;
+    color: rgb(4, 109, 122);
 }
 
 i.fa-home:hover{
@@ -126,25 +127,63 @@ i.fa-home:hover{
 }
 
 i.fa-search{
-    font-size: 12px;
+    font-size: 20px;
     color: rgb(146, 5, 5);
 }
 
 i.fa-search:hover{
-    font-size: 14px;
+    font-size: 22px;
     color: rgb(61, 146, 5);
 }
 
 i.fa-times-circle{
-    font-size: 30px;
+    font-size: 45px;
     color: rgb(4, 109, 122);
 }
 
 i.fa-times-circle:hover{
     color:rgb(4, 206, 233);
-    font-size: 35px;
+    font-size: 47px;
 }
 
+i.fa-shopping-cart{
+    margin-right: 15px;
+    font-size: 45px;
+    color: rgb(4, 109, 122);
+}
+
+i.fa-shopping-cart:hover{
+
+    color:rgb(4, 206, 233);
+    font-size: 47px;
+}
+
+i.fa-shopping-cart.active{
+    margin-right: 15px;
+    font-size: 45px;
+    color: rgb(187, 93, 11);
+}
+
+i.fa-shopping-cart.active:hover{
+
+    color: rgb(224, 117, 25);
+    font-size: 47px;
+}
+
+#cart-show{
+    top: -25px;
+    position: relative;
+    font-size: 12px;
+    font-weight: bolder;
+    background-color: #ff0000ab;
+    border-radius: 10px;
+    padding: 0.3px 3px;
+    color: #f4f4f4;
+}
+
+#cart-show.disabled{
+    display: none;
+}
 /* STORE PANEL COMPONENTS STYLESHEETS */
 
 @keyframes left-out {
@@ -161,7 +200,7 @@ i.fa-times-circle:hover{
 .store-container{
 
     width: 100%;
-    height: 380px;
+    height: 74vh;
     position: relative;
     overflow-x: hidden;
     margin-bottom:auto;
@@ -169,7 +208,6 @@ i.fa-times-circle:hover{
 }
 
 #filter-container{
-    width: 60%;
     height: 100%;
     display: inline;
 }
@@ -266,11 +304,10 @@ i.fa-times-circle:hover{
     z-index:1;
 	background: #222;
 	background: -webkit-linear-gradient(to right, #222, rgb(51, 51, 51));
-	background: linear-gradient(to right, #222 rgb(51, 51, 51));
 }
 
 .music-box i{
-    padding-top: 160px;
+    padding-top: 30vh;
     font-size: 30px;
     padding-left: 10px;
     color:grey;
@@ -287,14 +324,14 @@ i.fa-times-circle:hover{
     padding-left: 25px;
     height: 100%;
     display: grid;
-    grid-template-rows: 150px 150px;
-    grid-template-columns: 267px 267px 267px 267px;
+    grid-template-rows: 200px 200px;
+    grid-template-columns: 356px 356px 356px 356px;
     grid-gap: 15px;
 }
 
 .song-box{
-    height: 150px;
-    width: 267px;
+    height: 200px;
+    width: 356px;
     margin:auto;
     border-radius: 5px;
     background-color:rgb(51, 51, 51);
@@ -305,14 +342,14 @@ i.fa-times-circle:hover{
 }
 
 .song-info{
-    height: 50px;
+    height: 75px;
     width: 100%;
     background-color: rgba(0,0,0,0.7);
     color: white;
     display: grid;
     grid-template-rows: 25px 25px;
     grid-template-columns: 83px 83px 83px;
-    margin-top: 95px;
+    margin-top: 122px;
     margin-bottom: 3px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
@@ -321,7 +358,7 @@ i.fa-times-circle:hover{
 
 .song-info i{
     height: 25px;
-    width: 83px;
+    width: 180px;
     font-size: 20px;
     padding-left: 10px;
     padding: 0px;
@@ -329,20 +366,24 @@ i.fa-times-circle:hover{
 }
 
 .song-info label{
-    font-size: 9px;
+    font-size: 17px;
+    font-weight: bold;
     height: 25px;
-    width: 130px;
+    width: 180px;
     color: rgb(0, 113, 243);
     opacity: 1;
 }
 
 .song-info button{
-    height: 15px;
-    width: 40px;
-    font-size: 8px;
+    height: 24px;
+    width: 60px;
+    font-size: 12px;
+    height: 24px;
+    width: 60px;
+    font-size: 12px;
     padding:0;
     margin-left: 70px;
-    margin-top: 1px;
+    margin-top: 10px;
 }
 
 audio{
@@ -351,10 +392,11 @@ audio{
     opacity: 0.4;
     width: 83px;
     height: 25px;
+    margin-top: 10px;
 }
 
 .song-price{
-    font-size: 15px;
+    font-size: 30px;
     font-weight: bold;
     color: red;
 }
@@ -372,16 +414,17 @@ audio{
 
 .label-song-artist{
     margin-top: 5px;
-    margin-left: 50px;
+    margin-left: 100px;
 }
 .song-title, .song-artist, .song-album{
-    font-size: 8px;
+    font-size: 12px;
     padding-left: 2px;
     color: white;
 }
 
 .song-info .label-song-price{
-    margin-left: 10px;
+    margin-left: 90px;
+    margin-top: 5px;
 
 }
 
@@ -391,7 +434,8 @@ audio{
 }
 
 .song-info .buy-button{
-    margin-left: 40px;
+    margin-left: 45px;
+    width: 120px;
 }
 
 /* [PAYMENT POPUP] */
@@ -410,10 +454,54 @@ audio{
     display: none;
 }
 
+.table-container{
+    height: 600px;
+    width: 400px;
+    overflow-y: auto;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+.responsive-table{
+    padding-left:0;
+}
+.remove-cart-button{
+    padding: 5px 10px;
+    height: 30px;
+}
+
+#cart-table{
+    width: 90%;
+    height: min-content;
+    background-color: yellow;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#cart-table thead{
+    height: 50px;
+    width: 100%;
+    background-color: #2baaff;
+}
+
+#cart-table tbody{
+    min-height: 350px;
+}
+
+#cart-table tr{
+    height: 25px;
+    width: 100%;
+}
+
+#cart-table td{
+
+}
+
 .payment-panel{
     padding: 30px 0px 0px 50px;
     width: 500px;
-    height: 400px;
+    height: 600px;
     margin: 50px auto auto auto;
     background-color: white;
     border-radius: 20px;;
@@ -431,15 +519,17 @@ audio{
     text-align: center;
 }
 
+.payment-button{
+    font-size: 14px;
+    padding: 8px 15px;
+}
 .payment-form{
-    margin: 30px auto 30px auto;
-    
-    width: 800px;
-    height: 260px;
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    height: 400px;
     overflow: hidden;
-    display: grid;
-    grid-template-rows: 100px 35px 35px 35px 35px;
-    grid-template-columns: 400px;
 }
 
 .payment-form label{
@@ -634,4 +724,92 @@ label.label-credentials input{
 #otp-msg.error{
     color: red;
     display: initial;
+}
+
+h2 {
+    font-size: 26px;
+    margin: 20px 0;
+    text-align: center;
+}
+small {
+    font-size: 0.5em;
+}
+
+li{
+    border-radius: 3px;
+    padding: 25px 30px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.table-header {
+    background-color: #95A5A6;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.table-row {
+    background-color: #ffffff;
+    box-shadow: 0px 0px 9px 0px rgba(0, 0, 0, 0.1);
+}
+
+.col-1 {
+    flex-basis: 30%;
+    padding-right: 10px;
+}
+
+.col-2 {
+    flex-basis: 30%;
+}
+
+.col-3 {
+    flex-basis: 20%;
+}
+
+.col-4 {
+    flex-basis: 20%;
+}
+
+.col-head.col-1 {
+    flex-basis: 30%;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.col-head.col-2 {
+    flex-basis: 20%;
+
+}
+
+.col-head.col-3 {
+    flex-basis: 20%;
+    padding-left: 5px;
+}
+
+.col-head.col-4 {
+    flex-basis: 20%;
+}
+
+@media all and (max-width: 767px) {
+    .table-header {
+        display: none;
+    }
+    .table-row{
+
+    }
+    li {
+        display: block;
+    }
+    .col {
+
+        flex-basis: 100%;
+
+    }
+    .col {
+        display: flex;
+        padding: 10px 0;
+
+}
 }

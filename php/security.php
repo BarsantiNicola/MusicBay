@@ -492,3 +492,34 @@ function check_captcha( string $captchaID, string $captchaValue ){
         );
 
 }
+
+/**
+ * Checks if the user request is valid and in the case update the authentication token
+ * @throws LogException  In case of invalid request
+ */
+function check_authentication(){
+
+    if( !isset( $_SESSION[ 'user-id' ], $_SESSION[ 'user-auth' ], $_COOKIE[ 'auth' ]))
+        throw new LogException(
+            [ 'EXPIRED-SESSION', 'USER-ERROR', 'SERVICE-ANALYSIS' ],
+            'SECURITY',
+            2,
+            'Bad Service Request. Missing session or cookie information[SESSION: ' . isset( $_SESSION['user-id' ]) . " COOKIE:" . isset( $_COOKIE[ 'user-auth' ]) . ']'
+        );
+
+    if( strcmp( $_SESSION[ 'user-auth' ], $_COOKIE[ 'auth' ]) != 0 )
+        throw new LogException(
+            [ 'EXPIRED-SESSION', 'USER-ERROR', 'SERVICE-ANALYSIS' ],
+            'SECURITY',
+            2,
+            'Bad Service Request. Missing session or cookie information[PHP_SESSION: ' .  $_SESSION[ 'user-id' ] . " COOKIE:" . $_COOKIE[ 'user-auth' ] . ']'
+        );
+
+    $_SESSION[ 'user-auth' ] = randBytes();
+    setcookie( 'auth', $_SESSION[ 'user-auth' ], time() + (86400 * 30), "store.php" );  //  force browser to save cookie in memory
+
+}
+
+function check_search( $genre, $filter, $page ){
+
+}

@@ -316,7 +316,7 @@ otpCheckButtons.forEach( button => button.addEventListener('click', function(eve
 	switch( data['type'] ){
 		case 'login':
 			if( login( data['username'], data['password'], data['otp-id'], data['otp-value'] ))
-				window.location.href = 'store.html';
+				window.location.href = 'store.php';
 			break;
 		
 		case 'password-change':
@@ -360,9 +360,6 @@ signUpRequest.addEventListener('click', (event) => {
 	event.preventDefault();
 
 	let data = checkRegistrationForm();   //  extraction and checking of the registration form inputs
-
-	if( data == null )   //  if inputs are wrong checkRegistrationForm returns null
-		return;
 
 	showCaptchaLoad( true );        //  preparing captcha loading
 	showCaptcha( 'right', data );   //  displaying the captcha on the secondary page

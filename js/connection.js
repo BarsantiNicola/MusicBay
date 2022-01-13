@@ -128,7 +128,7 @@ function registration( username, passwordHash, phone, captchaID, captchaValue ){
         success: function(){
             value = true;
         },
-        error: function( data ){
+        error: function(){
             showMessage( "error", "registration", "Something goes wrong with your request..", 5000 );
             value = false;
         }
@@ -157,7 +157,7 @@ function activateUser( username, otpID, otpValue ){
             showMessage( "success", "activation", "Account activated!", 3000 );
             value = true;
         },
-        error: function( data ){
+        error: function(){
             showMessage( "error", "activation", "Something goes wrong with your request..", 5000 );
             value = false;
         }
@@ -215,13 +215,127 @@ function changePassword( username, passwordHash, captchaID, captchaValue, otpID,
 //           }]    
 function getData( type, selection, filter, page ){
 
-    return [{ 'songID': '123','title': 'Hand in Hand', 'artist':'Hatsune Miku', 'price': '0.99$', 'song': 'demo/hand-in-hand.mp3', 'img':"pics/hand-in-hand.jpg"}];
+    let value = null;
+
+    $.ajax({
+
+        type: "POST",
+        url: 'php/service_logic.php',
+        data:{
+            "type": type,
+            "genre": selection,
+            "filter": filter,
+            "page" : page
+        },
+        async: false,
+        success: function(data){
+            value = JSON.parse( data.substr( 1 ));
+        },
+        error: function(data){
+            alert( JSON.stringify(data ));
+
+        }
+    });
+
+    return value;
+
+}
+
+function addToCart( songID ){
+
+    let value = 0;
+
+    $.ajax({
+
+        type: "POST",
+        url: 'php/service_logic.php',
+        data:{
+            "type": 'add_cart',
+            "song-id": songID,
+        },
+        async: false,
+        success: function(data){
+            showCart(parseInt( data.substr( 1 )))
+        },
+        error: function(data){
+            alert( JSON.stringify(data ));
+
+        }
+    });
+
+    return value;
+}
+
+function removeFromCart(songID){
+
+    let value = 0;
+
+    $.ajax({
+
+        type: "POST",
+        url: 'php/service_logic.php',
+        data:{
+            "type": 'remove_cart',
+            "song-id": songID,
+        },
+        async: false,
+        success: function(data){
+            showCart(parseInt( data.substr( 1 )))
+        },
+        error: function(data){
+            alert( JSON.stringify(data ));
+
+        }
+    });
+}
+
+function getCart(){
+
+    let value = [];
+
+    $.ajax({
+
+        type: "POST",
+        url: 'php/service_logic.php',
+        data:{
+            "type": 'get_cart'
+        },
+        async: false,
+        success: function(data){
+            value = JSON.parse( data.substr( 1 ));
+
+        },
+        error: function(data){
+            alert( JSON.stringify(data ));
+
+        }
+    });
+    return value;
 }
 
 //  Ma
-function buySong( songID, ccn, cvv, name, surname, expire, otpID, otpValue ){
+function makePayment(){
 
-    return otpID === 'asdj02ednasd01223' && otpValue === '123456';
+    let value = null;
+    $.ajax({
+
+        type: "POST",
+        url: 'php/service_logic.php',
+        data:{
+               "type": "buy",
+               "transactionID" : generateString(32 )   //  just for testing purpose
+        },
+        async: false,
+        success: function(){
+            value = true;
+        },
+        error: function(data){
+            alert( JSON.stringify(data) );
+            value = false;
+        }
+    });
+
+    return value;
 }
 
 function downloadSong( songID ){

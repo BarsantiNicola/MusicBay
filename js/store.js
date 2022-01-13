@@ -1,7 +1,6 @@
 const storeBox = document.getElementById( 'store-box' );             //  music container
 const paymentPanel = document.getElementById( 'pay-panel' );         //  payment panel containing payment form and otp
 const otpForm = document.getElementById( 'otp-form' );               //  otp form container
-const otpMsg = document.getElementById( 'otp-msg' );                 //  response message inserted into the otp form
 const popup = document.getElementsByClassName( 'payment-popup' )[0]; //  secondary popup containing the payment panel
 const paymentForm = document.getElementsByClassName( 'payment-form' )[0];   //  payment form inside popup
 
@@ -20,9 +19,6 @@ document.addEventListener( 'DOMContentLoaded', function(){
     requestSemaphore = true;     //  cleaning all the resources
     cleanMusicContainer();
     cleanFilters();
-    cleanOTPform();
-    cleanPaymentForm();
-	loadOTP();                   //  loading of otp event handlers on otp form
     makeDefaultSearch();         //  putting buyed songs into the home folder
     showLoadPage( false );       //  display the home folder removing the loading panel
     requestSemaphore = false;    //  enable requests to the server
@@ -37,19 +33,69 @@ document.getElementById( 'exit-button' ).addEventListener( 'click', function(){
 })
 
 //  shows a popup containing the payment and otp forms
-function showPopup( songID ){
+function showPopup(){
 
-    paymentForm.getElementsByClassName( 'hidden-input' )[0].value = songID;
     popup.classList.remove( 'disable' );
-
+    let data = getCart();
+    for( let row of data )
+        addCartRow( row );
 }
 
 //  removes the popup displaying the main page
 function hidePopup(){
 
-    popup.classList.add( 'disable' ); 
-    cleanPaymentForm();
+    extendSearch();
+    popup.classList.add( 'disable' );
+    cleanCartTable();
 
+}
+
+function addCartRow( row ){
+
+    let table = document.getElementsByClassName( "responsive-table" )[0];
+    let table_row = document.createElement( "li" );
+    table_row.classList.add( "table-row" );
+    let title = document.createElement( "div" );
+    title.classList.add("col");
+    title.classList.add("col-1");
+    let artist = document.createElement( "div" );
+    artist.classList.add("col");
+    artist.classList.add("col-2");
+    let price = document.createElement( "div" );
+    price.classList.add("col");
+    price.classList.add("col-3");
+    let button = document.createElement( "button" );
+
+    button.classList.add("remove-cart-button");
+
+    title.textContent = row[ 'title' ];
+    artist.textContent = row[ 'artist' ];
+    price.textContent = row[ 'price' ];
+    button.textContent = "Remove";
+    button.addEventListener( 'click', function( event ){
+
+        event.preventDefault();
+        removeFromCart( row[ 'song-id' ]);
+        removeCartRow( row[ 'title' ]);
+    })
+
+    table_row.appendChild( title );
+    table_row.appendChild( artist );
+    table_row.appendChild( price );
+    table_row.appendChild( button );
+    table.appendChild( table_row );
+}
+
+function removeCartRow( title ){
+    document.querySelectorAll( ".table-row" ).forEach( (row)=> {
+        if( row.getElementsByClassName( "col-1")[0].textContent == title )
+            document.getElementsByClassName( "responsive-table" )[0].removeChild( row );
+    })
+}
+
+function cleanCartTable(){
+    let table = document.getElementsByClassName( "responsive-table" )[0];
+    table.querySelectorAll( ".table-row" ).forEach( (row) => table.removeChild( row ));
 }
 
 //  shows a loading panel on the music box for hide the music-box displayment
@@ -81,7 +127,7 @@ document.getElementById( 'home-search' ).addEventListener( 'click', function(eve
 
     event.preventDefault();
     if( requestSemaphore ) return; //  one request a time
-    
+
     requestSemaphore = true;       // <-  MUTUAL EXCLUSION
     showLoadPage( true );          //  hide music box
     setTimeout( function(){
@@ -184,6 +230,14 @@ document.getElementById( 'right-arrow' ).addEventListener( 'click', function(eve
 
 });
 
+document.getElementById( 'shopping-cart' ).addEventListener( 'click', function( event ){
+
+    event.preventDefault();
+    const data = document.getElementById( 'cart-show' );
+    if( !data.classList.contains( 'disabled' ))
+        showPopup(1 );
+});
+
 //  extracts search inputs values
 function extractSearchData(){
 
@@ -204,6 +258,21 @@ function extractSearchData(){
     });
     
     return data;
+}
+
+function showCart( value ){
+
+    const cart = document.getElementById( 'cart-show' );
+    const icon = document.getElementsByClassName('fa-shopping-cart' )[0];
+    if( value > 0 ){
+        cart.textContent = value;
+        cart.classList.remove( "disabled" );
+        icon.classList.add( "active" );
+    }else{
+        cart.textContent = '';
+        cart.classList.add( "disabled" );
+        icon.classList.remove( "active" );
+    }
 }
 
 //  cleans all the search inputs
@@ -293,7 +362,8 @@ function loadSongs( page, songs ){
     else
         document.getElementById( 'left-arrow' ).style.opacity = 1;
 
-    songs.forEach( song => addSong( song['songID'], song['title'], song['artist'],  song['price'], song['song'], song['img'] ));
+    for( let song of songs )
+        addSong( song['songID'], song['title'], song['artist'],  song['price'], song['song'], song['img'] );
 
 }
 
@@ -314,7 +384,7 @@ function addSong( songID, title, artist, songPrice, song, img ){
 
     let songBox = document.createElement( 'div' );
     songBox.classList.add( 'song-box' );
-    songBox.style.backgroundImage = 'url( ' + img + ')';
+    songBox.style.backgroundImage = 'url( pics/' + img + ')';
 
     let songInfo = document.createElement( 'div' );
     songInfo.classList.add( 'song-info' );
@@ -323,10 +393,10 @@ function addSong( songID, title, artist, songPrice, song, img ){
 
     let button = document.createElement( 'button' );
     button.classList.add( 'buy-button' );
-    button.textContent = 'Buy';
+    button.textContent = 'Add to Cart';
     button.addEventListener( 'click', function( event ){
         event.preventDefault();
-        showPopup( songID );
+        addToCart( songID );
     });
 
     let price = document.createElement( 'label' );
@@ -334,7 +404,10 @@ function addSong( songID, title, artist, songPrice, song, img ){
 
     let priceSpan = document.createElement( 'span' );
     priceSpan.classList.add( 'song-price' );
-    priceSpan.textContent = songPrice;
+    if( songPrice !== undefined && songPrice != null )
+        priceSpan.textContent = songPrice;
+    else
+        priceSpan.textContent = '';
     price.appendChild( priceSpan );
 
     for( let i = 0; i<3; i++ ){
@@ -369,10 +442,10 @@ function addSong( songID, title, artist, songPrice, song, img ){
     }
 
     songMusic.innerHTML = '<audio controls>Your browser does not support the audio element</audio>';
-    songMusic.getElementsByTagName( 'audio' )[0].src = song;
+    songMusic.getElementsByTagName( 'audio' )[0].src = "demo/"+song;
     songInfo.appendChild( songMusic );
 
-    if( songPrice.length > 0 ){
+    if( songPrice !== undefined && songPrice != null && songPrice.length > 0 ){
         songInfo.appendChild( button );
         songInfo.appendChild( price );
     }else{
@@ -415,7 +488,6 @@ document.getElementById( 'retry-button' ).addEventListener( 'click', function(ev
 
     event.preventDefault();
     hidePopup();            //  hiding the popup containing the payment form
-    cleanPaymentForm();     //  when hide clean the inputs and stored information
 
 })
 
@@ -428,260 +500,13 @@ document.getElementById( 'retry-button' ).addEventListener( 'click', function(ev
 document.getElementById( 'pay-button' ).addEventListener( 'click', function(event){
 
     event.preventDefault();
-    let data = checkPaymentForm();
-    if( data == null )
-        return;
-    
-    showOTP( data );
-    cleanPaymentForm();
+    makePayment();
+    cleanCartTable();
+    showCart(0);
+    hidePopup();
+
 
 })
 
-//   Dynamic behaviour of ccn input, checks values are digits and autoinsert bars every 4 digits
-document.querySelector('.input-ccn').addEventListener( 'input', function() { 
-
-    let text=this.value;                                        
-    text=text.replace(/\D/g,'');    // remove illegal characters
-    if(text.length>3) text=text.replace(/.{4}/,'$&-');   // Add - at pos.5
-    if(text.length>7) text=text.replace(/.{9}/,'$&-');   // Add - at pos.10
-    if(text.length>7) text=text.replace(/.{14}/,'$&-');  // Add - at pos.15
-    this.value=text; 
-
-});
-
-//   Dynamic behaviour of cvv input, checks values are digits
-document.querySelector('.input-cvv').addEventListener( 'input', function() { 
-
-    let text=this.value;                                                     
-    text=text.replace(/\D/g,'');  //Remove illegal characters
-    this.value=text; 
-
-});
-
-//  checks payment form inputs and extract their values. Returns null in case at least one input isn't valid
-function checkPaymentForm(){
-
-    let data = {};
-    let inputs =  paymentForm.getElementsByTagName( 'input' );
-    for( let input of inputs )
-        switch( input.name ){
-
-            case 'ccn':
-                data['ccn'] = checkCCN( input.value );
-                if( data['ccn'] == null ) return null;
-                break;
-
-            case 'cvv':
-                data['cvv'] = checkCVV( input.value );
-                if( data['cvv'] == null ) return null;
-                break;
-
-            case 'name':
-                if( input.value.length > 0 )
-                    data['name'] = input.value;
-                else
-                    return null;    
-                break;
-
-            case 'surname':
-                if( input.value.length > 0 )
-                    data['surname'] = input.value;
-                else
-                    return null;    
-                break;
-
-            case 'expire':
-                data['expire'] = input.value;
-                break;
-
-            case 'songID':
-                if( input.value.length > 0 )
-                    data['songID'] = input.value;
-                else
-                    return null; 
-                break;
-
-            default:
-                break;                     
-        }
-
-    return data;
-}
-
-//  checks the ccn is valid. Returns the ccn or null in case is invalid
-function checkCCN( value ){
-
-    if( value.length !== 19 ) return null;  //  ccn must be 19 char(plus -)
-    value = value.replaceAll( '-', '' );   //  removing the bars
-    if( /^\d+$/.test( value ))             //  verify all chars are numbers
-        return value;  
-    
-    return null;  
-
-}
-
-//  checks the cvv is valid. Returns the cvv or null in case is invalid
-function checkCVV( value ){
-
-    if( value.length !== 3 ) return null;
-    return /^\d+$/.test( value )? value : null;
-
-}
-
-//  cleans the payment form inputs
-function cleanPaymentForm(){
-    paymentForm.querySelectorAll( 'input' ).forEach( input => input.value = '' );
-}
 
 
-////  OTP MANAGEMENT
-
-////   Click on Undo Button on the OTP Form
-//
-//   Actions:
-//             - clean stored information
-//             - move to primary panel
-document.getElementById( 'undo-otp-button' ).addEventListener( 'click', function(event){
-
-    event.preventDefault();
-    hideOTP();
-
-})
-
-////   Click on Confirm Button on the OTP Form
-//
-//   Actions:
-//             - get the stored information
-//             - make request to the server
-//             - after reply show a message
-//             - after 5s close the payment panel
-//             - hide OTP form
-document.getElementById( 'check-otp-button' ).addEventListener( 'click', function(event){
-
-    event.preventDefault();
-    let otp = checkOTPform();
-
-    if( otp == null ){
-        showOTPerror( 'All the OTP fields must be present');
-        return;
-    }
-
-    let data = extractOTPinfo();
-    
-    if( buySong( data['songID'], data['ccn'], data['cvv'], data['name'], data['surname'], data['expire'], data['otp-id'], otp)){
-        showOTPok();
-        setTimeout( function(){
-            hideOTP();
-            hidePopup();
-        }, 2000 );
-    }else{    
-        showOTPerror( 'Error, invalid OTP' );
-        setTimeout( function(){
-            hideOTP();
-        }, 2000 );
-    }
-})
-
-//  Function to load OTP management on form's inputs
-function loadOTP(){
-
-    let inputs = otpForm.querySelectorAll( '.form-control' );
-	for( let i = 0; i < inputs.length; i++ ){
-
-		inputs[i].value = '';  
-
-		//  each input of the otp is managed by a different eventListener
-    	inputs[i].addEventListener( 'keydown', function( event ){
-	
-			//  DEL button for moving left on the OTP removing data
-      		if( event.key === 'Backspace' ) {
-
-        		inputs[i].value = '';
-        		if( i > 0 )  
-          			inputs[ i - 1] .focus();
-				event.preventDefault();  //  prevents the drop of the previous element on focus
-
-      		}else{
-
-        		if( i === inputs.length - 1 && inputs[i].value !== '' )
-          			return true; // do nothing but not preventing fast switch on confirm button
-
-				//  only numbers admitted
-				if( event.keyCode > 47 && event.keyCode < 58 ) {
-          	
-					inputs[i].value = event.key;
-        			if( i !== inputs.length -1 )
-        				inputs[ i + 1 ].focus();
-      				event.preventDefault();  //  prevents doubling of the value on the next element on focus
-       			
-				}else 
-         			event.preventDefault();  //  prevents the insertion of the value
-        				
-      		}
-    	});
-	}
-}
-
-//  Shows the OTP panel and put the given data into the form hidden-inputs
-function showOTP( data ){
-
-    paymentPanel.querySelectorAll( '.hidden-input' ).forEach( input => input.value = input.name !== 'otp-id'? data[input.name] : getUnnamedOTP());
-    paymentPanel.classList.add( 'active-otp-form' );
-
-}
-
-//  shows otp response OK into the otp form
-function showOTPok(){
-    cleanOTPmessage();
-    otpMsg.textContent = 'Request correctly done';
-    otpMsg.classList.add( 'ok' );
-}
-
-//  shows otp response ERROR into the otp form
-function showOTPerror( message ){
-    cleanOTPmessage();
-    otpMsg.textContent = message;
-    otpMsg.classList.add( 'error' );
-}
-
-//  removes the displayed message
-function cleanOTPmessage(){
-    otpMsg.classList.remove( 'ok' );
-    otpMsg.classList.remove( 'error' );
-    otpMsg.textContent = '';
-}
-
-//  Checks the validity of the OTP input. In case of success it will return the OTP code otherwise null
-function checkOTPform(){
-
-    let otpValue = '';
-    let inputs = otpForm.getElementsByClassName( 'form-control' );
-    for( let input of inputs )
-        if( input.value.length !== '1' ) return null;
-        else otpValue = otpValue + input.value;
-    return otpValue;
-}
-
-//  Extracts the stored information into the otp form
-function extractOTPinfo(){
-
-    let data = {};
-    otpForm.querySelectorAll( '.hidden-input' ).forEach( input => data[input.name] = input.value );
-    return data;
-}
-
-//  Cleans all the stored information and hide the OTP panel restoring the payment form
-function hideOTP(){
-    
-    document.getElementById( 'hidden-pay-songID' ).value = document.getElementById( 'hidden-otp-songID' ).value;
-    paymentPanel.classList.remove( 'active-otp-form' );
-    cleanOTPform();
-
-}
-
-//  Cleans all the store information into the OTP panel
-function cleanOTPform(){
-
-    otpForm.querySelectorAll( 'input' ).forEach( input => input.value = '' );
-    cleanOTPmessage();
-}

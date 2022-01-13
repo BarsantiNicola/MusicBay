@@ -30,7 +30,13 @@ try{
 
                     //  caching user data into the session for autologin/internal service functions
                     $_SESSION[ 'user-id' ] = $result[ 'uID' ];
+                    $_SESSION[ 'user-auth' ] = randBytes();
                     $_SESSION[ 'user-phone' ] = $result[ 'phone' ];
+
+                    //  setting additional cookie on client-side for security improvement
+                    //  [brute force on sessionID useless]
+                    $_COOKIE[ 'auth' ] = $_SESSION[ 'user-auth' ];
+                    setcookie( 'auth', $_SESSION[ 'user-auth' ], time() + (86400 * 30), "store.php" );  //  force browser to save cookie in memory
 
                 }else
                     throw new LogException(
@@ -166,10 +172,16 @@ try{
                     [ 'SERVICE-ANALYSIS' ],
                     'FRONTEND-LOGIC',
                     8,
-                    'Bad General Request missing basic field "type"[Out of client Request]'
+                    'Bad General Request invalid field "type"[Out of client Request]'
                 );
         }
-    }
+    }else
+        throw new LogException(
+            [ 'SERVICE-ANALYSIS' ],
+            'FRONTEND-LOGIC',
+            8,
+            'Bad General Request missing basic field "type"[Out of client Request]'
+        );
 
 }catch( LogException $e ){
     writeLog( $e );

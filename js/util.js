@@ -9,7 +9,7 @@ const rightPanel = document.getElementById( 'right-panel' );     //  right panel
 //  Shows the primary panel of left and right side
 function showPrimaryPanel( type ){
 
-    if( type === 'left' )
+    if( type == 'left' )
         leftPanel.classList.remove( 'left-panel-active' );
     else    
         rightPanel.classList.remove( 'right-panel-active' );
@@ -18,7 +18,7 @@ function showPrimaryPanel( type ){
 
 //  Shows the secondary panel of left and right side
 function showSecondaryPanel( type ){
-    if( type === 'left' ){
+    if( type == 'left' ){
         leftPanel.classList.add( 'left-panel-active' );
     }else
         rightPanel.classList.add( 'right-panel-active' );   
@@ -59,7 +59,7 @@ function showMessage( type, request, message, time ){
             return;
     }
 
-    if( type === 'success' ){
+    if( type == 'success' ){
         tag.classList.remove( 'error' );  //  clean possible remaining tag
         tag.classList.add( 'success' );
     }else{
@@ -94,7 +94,7 @@ function passwordEvaluation( input, event ){
 
 	const form = input.parentNode;
     
-    if( input.value.length === 1 && event.key === 'Backspace' ){  //  empty input => removing the score section
+    if( input.value.length == 1 && event.key == 'Backspace' ){  //  empty input => removing the score section
 
         form.getElementsByTagName("img")[0].src = "img/strength_1.png";
         form.classList.remove("active-report"); 
@@ -102,7 +102,7 @@ function passwordEvaluation( input, event ){
     }else{
 
         let score = zxcvbn( input.value ).score;   //  evaluating password score
-	    score = score === 0 ? score + 1 : score;    //  merging level 0 and 1 into 0
+	    score = score == 0 ? score + 1 : score;    //  merging level 0 and 1 into 0
 	    form.getElementsByTagName( 'img' )[0].src = 'img/strength_' + score + '.png'; //  select image to be showed basing on score
 	    form.classList.add( 'active-report' );     //  showing password score
 
@@ -112,12 +112,8 @@ function passwordEvaluation( input, event ){
 //  verification of usernames
 function usernameVerification( username ){
 
-    if( username.length === 0 )
+    if( username.length == 0 )
         return null;
-
-    for( let i = 0; i<username.length; i++ )
-        if( username[i]<33 || username[i] > 127 )
-            return null;
 
     return username;        
 }
@@ -125,9 +121,9 @@ function usernameVerification( username ){
 //  verification of phone number
 function phoneVerification( number ){
 
-    if( number.length !== 10 || number[0] !== 3 ) 
+    if( number.length != 10 || number[0] != 3 )
         return null;
-   
+
     return number;
 }
 
@@ -141,15 +137,15 @@ function checkLoginForm(){
 
     //  extraction of login fields
     for( let input of loginFormInputs )
-        if( input.name === 'username' )
+        if( input.name == 'username' )
             username = input.value;
-        else if( input.name === 'password' )
+        else if( input.name == 'password' )
             password = input.value;
     
     username = usernameVerification( username );  //  check of username
-    password = password.length === 0? null : sha256(password); //  password needs no checks(will be hashed)
+    password = password.length == 0? null : sha256(password); //  password needs no checks(will be hashed)
 
-    if( username === null || password === null )    //  if some info missing do nothing
+    if( username == null || password == null )    //  if some info missing do nothing
         return null;
     else
         return { 'username': username, 'password': password, 'type':'login' };  //  data to be forwarded to the OTP form
@@ -192,13 +188,13 @@ function checkPasswordForm(){
                 break;            
         }
     
-    if( password !== password2 )   //  check password and repeated password are equal
+    if( password != password2 )   //  check password and repeated password are equal
         return null;
 
     username = usernameVerification( username );                //  check of username 
-    password = password.length === 0? null : sha256(password);   //  password needs no checks(will be hashed)  
+    password = password.length == 0? null : sha256(password);   //  password needs no checks(will be hashed)
 
-    if( username === null || password === null )  //  if some info missing do nothing
+    if( username == null || password == null )  //  if some info missing do nothing
         return null;
     else
         return { 'username': username, 'password': password, 'type':'password-change' }; //  data to be forwarded to the Captcha form
@@ -248,15 +244,15 @@ function checkRegistrationForm(){
                 break;
             default: break;        
         }
-     
-    if( password !== password2 )  //  check password and repeated password are equal
+
+    if( password != password2 )  //  check password and repeated password are equal
         return null;
         
     username = usernameVerification( username );     //  check of username 
-    password = password.length === 0? null : sha256(password);  //  password needs no checks(will be hashed)  
+    password = password.length == 0? null : sha256(password);  //  password needs no checks(will be hashed)  
     phone = phoneVerification( phone );
-       
-    if( username === null || password === null || phone === null )   //  if some info missing do nothing
+
+    if( username == null || password == null || phone == null )   //  if some info missing do nothing
         return null;
     else
         return { 'username': username, 'password': password, 'phone': phone, 'type': 'registration' };
@@ -292,7 +288,7 @@ function CaptchaLoad(){
 	for( let i = 0; i<captchas.length; i++ )
 		captchas[i].addEventListener( 'click', function(){
 
-			globalThis.captcha_mask[i%16] = globalThis.captcha_mask[i%16] === 0? 1 : 0; //  clicking will generate a mask to be applied on the captcha key
+			globalThis.captcha_mask[i%16] = globalThis.captcha_mask[i%16] == 0? 1 : 0; //  clicking will generate a mask to be applied on the captcha key
 			if( this.classList.contains( 'active-captcha' ))  //  showing image clicked[binary logic]
 				this.classList.remove( 'active-captcha' );
 			else
@@ -306,14 +302,14 @@ function CaptchaLoad(){
 function loadCaptchaInformation( type ){
 
     let response = getCaptcha( type );  //  request the information to the server
-    if( response === null )
+    if( response == null )
         return;
 
     let identificator = 'captcha_' + type + '_';
 
     //  insertion of captcha-id information into the captcha form
     document.getElementById( 'captcha-' + type + '-container' ).querySelectorAll( '.hidden-input' ).forEach( input => {
-        if( input.name === 'captcha-id' ) input.value = response[ 'captcha-id' ];
+        if( input.name == 'captcha-id' ) input.value = response[ 'captcha-id' ];
     })
     globalThis.captcha_value = response[ 'captcha-value' ];
     document.getElementById( 'captcha-' + type + '-container' ).getElementsByTagName( 'th' )[0].textContent = response[ 'captcha-clue' ];
@@ -332,7 +328,7 @@ function generateCaptchaValue(){
 
 	let value ='';
 	for( let i = 0; i<globalThis.captcha_mask.length; i++ ){
-        if( globalThis.captcha_mask[i] === 0 )     //  more secure removing the selected box not viceversa(higher key value length)
+        if( globalThis.captcha_mask[i] == 0 )     //  more secure removing the selected box not viceversa(higher key value length)
             value = value + globalThis.captcha_value[i];
         globalThis.captcha_mask[i] = 0;         //  immediately dropping all the info needed to recover the key[low low low security improval but better]
     }
@@ -341,7 +337,7 @@ function generateCaptchaValue(){
 
 //  Loads/removes an animation on captcha for loading
 function showCaptchaLoad( state ){
-    if( state === true ){
+    if( state == true ){
         document.querySelectorAll( '.loading-captcha' ).forEach( element => element.classList.add( 'ready' ));
         document.querySelectorAll( '.captcha-box' ).forEach( element => element.classList.remove( 'ready' ));
     }else{
@@ -352,7 +348,7 @@ function showCaptchaLoad( state ){
 
 //  Shows/Hides the animation on captcha for loading(preventing to see strange behaviour of flex)
 function unlockCaptchaLoad( state ){
-    if( state === true )
+    if( state == true )
         document.querySelectorAll( '.loading-captcha' ).forEach( element => element.getElementsByTagName( 'img' )[0].classList.add( 'ready' )); 
     else
         document.querySelectorAll( '.loading-captcha' ).forEach( element => element.getElementsByTagName( 'img' )[0].classList.remove( 'ready' ));     
@@ -427,14 +423,14 @@ const rightOTPInputs = document.getElementById( 'otp-right' ).querySelectorAll( 
 //  store information into the hidden fields of the otp form and show it
 function showOtp( type, data ){
 
-    if( type === 'right' ){
+    if( type == 'right' ){
         if( !registration( data['username'], data['password'], data['phone'], data['captcha-id'], data['captcha-value'])){
             showPrimaryPanel( type );
             return;
         }
     }
     let result = getOTP( data['username'] );  //  request to the server of an OTP verification
-    if( result === null )
+    if( result == null )
         return;
 
     document.getElementById( 'otp-'+type+'-form' ).querySelectorAll( '.hidden-input' ).forEach( input => {
@@ -482,7 +478,7 @@ function checkOTPpanel( type ){
 
     let otpInputs = document.getElementById( 'otp-' + type + '-form' ).getElementsByClassName( 'form-control' );
     for( let input of otpInputs )
-        if( input.value.length !== 1 )
+        if( input.value.length != 1 )
             return false;
             
     return true;
