@@ -6,8 +6,8 @@ include_once( 'LogException.php' );
  * Function for taking the configuration file needed by the webserver
  * @return mixed A dictionary containing the configuration file
  */
-function getConfiguration(){
-    return json_decode( file_get_contents( '../conf/conf' ));
+function getConfiguration( $file ){
+    return json_decode( file_get_contents( '../conf/' . $file ));
 }
 
 /**
@@ -38,7 +38,7 @@ function writeLog( LogException $logException ){
  */
 function exposeData( string $type, string $name ): string{
 
-    $configuration = getConfiguration();
+    $configuration = getConfiguration( 'conf' );
 
     //  to improve security the database contains only the file name without any reference of the absolute position
     switch( $type ){  //  generation of relative path to the data

@@ -323,6 +323,97 @@ function sanitize_captchaValue( string $captchaValue ): string{
 }
 
 /**
+ * Checks the given captchaValue is valid
+ * Condition on captchaValue:
+ *       - must be at most of 16 characters
+ *       - must contain only characters and digits
+ * @param string $src  source file to be checked
+ * @throws LogException  If the given source is invalid or not contained into the data folder
+ */
+function sanitize_source( string $src ): string{
+
+    $conf = getConfiguration( 'data' );
+
+    if( $src == null || strlen( $src ) == 0 )
+        throw new LogException(
+            [ 'XSS-ATTACK' ],
+            'SECURITY',
+            10,
+            'Invalid source found into the database: ' . $src
+        );
+
+    $src_sanitized = realpath( $src );
+
+    if( $src_sanitized == false || strpos( $src_sanitized, $conf->general ) != 0 )
+        throw new LogException(
+            [ 'XSS-ATTACK' ],
+            'SECURITY',
+            10,
+            'Invalid source found into the database2: ' . $src
+        );
+
+    return $src_sanitized;
+}
+
+/**
+ * Checks the given mask is valid
+ * Condition on captchaValue:
+ *       - must be 16 characters
+ *       - must contain only 0 and 1
+ * @param string $mask  mask to be checked
+ * @throws LogException  If the given source is invalid or not contained into the data folder
+ */
+function sanitize_mask( string $mask ): string{
+
+    if( $mask == null || strlen( $mask ) != 16 )
+        throw new LogException(
+            [ 'XSS-ATTACK' ],
+            'SECURITY',
+            10,
+            'Invalid mask found into the database: ' . $mask
+        );
+
+    if( !preg_match('/^[0-1]/', $mask ))
+        throw new LogException(
+            [ 'XSS-ATTACK' ],
+            'SECURITY',
+            9,
+            'Sanitization of mask failed. Some invalid characters present -> ' . $mask
+        );
+
+    return $mask;
+
+}
+
+/**
+ * Checks the given mask is valid
+ * Condition on captchaValue:
+ *       - must contain only digits
+ * @param string $id  id to be checked
+ * @throws LogException  If the given source is invalid or not contained into the data folder
+ */
+function sanitize_id( string $id ): int{
+
+    if( $id == null || strlen( $id ) == 0 )
+        throw new LogException(
+            [ 'XSS-ATTACK' ],
+            'SECURITY',
+            10,
+            'Invalid id found into the database: ' . $id
+        );
+
+    if( !preg_match('/^[0-9]/', $id ))
+        throw new LogException(
+            [ 'XSS-ATTACK' ],
+            'SECURITY',
+            9,
+            'Sanitization of id failed. Some invalid characters present -> ' . $id
+        );
+
+    return $id;
+
+}
+/**
  * Checks the validity of a registration request by sanitizing all the given inputs. The function automatically cleans
  * the given data from any space/tab
  * @param string $username     Username to be registered

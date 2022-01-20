@@ -268,8 +268,6 @@ function addToCart( songID ){
 
 function removeFromCart(songID){
 
-    let value = 0;
-
     $.ajax({
 
         type: "POST",
@@ -282,10 +280,8 @@ function removeFromCart(songID){
         success: function(data){
             showCart(parseInt( data.substr( 1 )))
         },
-        error: function(data){
-            alert( JSON.stringify(data ));
+        error: function(){}
 
-        }
     });
 }
 
@@ -339,7 +335,28 @@ function makePayment(){
 }
 
 function downloadSong( songID ){
-    alert("downloading start");
+
+    $.ajax({
+
+        type: "POST",
+        url: 'php/service_logic.php',
+        data:{
+            "type": "download",
+            "song-id": songID
+        },
+        async: true,
+        success: function(data){
+            let downloadData = JSON.parse( data.substr( 1 ));
+            const link = document.createElement("a" );
+            link.href = downloadData[ 'url' ];
+            link.download = downloadData[ 'title' ];
+            link.click();
+        },
+        error: function(data){
+            alert(JSON.stringify(data));
+        }
+    });
+
 }
 
 function disconnect(){

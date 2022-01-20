@@ -435,6 +435,20 @@ function PasswordEvaluationLoad(){
 //  Function to start listener for input and password analysis from an input using zxcvbn
 function singlePasswordEvaluationLoad(inputs, type){
 
+	let data = [];
+	for( let i = 0; i< inputs.length; i++ ){
+		switch( inputs[i].name ){
+			case "username":
+				data.push( inputs[i] );
+				break;
+			case "phone":
+				data.push( inputs[i] );
+				break;
+			default:
+				break;
+		}
+	}
+
 	for( let i = 0; i < inputs.length; i++ ){
 
 		if( inputs[i].name === "password")
@@ -449,7 +463,7 @@ function singlePasswordEvaluationLoad(inputs, type){
 					if( event.key === "Backspace" )  //  just deleting input, leaving the management to event.default
 						return;
 
-				passwordEvaluation( inputs[i], event );  //  checking password with zxcvbn
+				passwordEvaluation( inputs[i], data, event );  //  checking password with zxcvbn
 
 				if( event.key === "Enter" ){  //  input management(move forward on inputs or on the button)
 					if( i === inputs.length -1 ){

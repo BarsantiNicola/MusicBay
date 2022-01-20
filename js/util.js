@@ -90,10 +90,13 @@ function usernameCheck( event ){
 }
 
 //  evaluation of the score of a password by the zxcvbn module
-function passwordEvaluation( input, event ){
+function passwordEvaluation( input, data, event ){
 
 	const form = input.parentNode;
-    
+    let dataText = [];
+    for( let d in data )
+        dataText.push( data.value );
+
     if( input.value.length == 1 && event.key == 'Backspace' ){  //  empty input => removing the score section
 
         form.getElementsByTagName("img")[0].src = "img/strength_1.png";
@@ -101,7 +104,8 @@ function passwordEvaluation( input, event ){
 
     }else{
 
-        let score = zxcvbn( input.value ).score;   //  evaluating password score
+        // username, telefono
+        let score = zxcvbn( input.value, dataText ).score;   //  evaluating password score
 	    score = score == 0 ? score + 1 : score;    //  merging level 0 and 1 into 0
 	    form.getElementsByTagName( 'img' )[0].src = 'img/strength_' + score + '.png'; //  select image to be showed basing on score
 	    form.classList.add( 'active-report' );     //  showing password score

@@ -145,6 +145,19 @@ try {
                 }
                 break;
 
+            case 'download':
+                if( !isset( $_POST[ 'song-id' ]))
+                    throw new LogException(
+                        [ 'SERVICE-ANALYSIS' ],
+                        'SERVICE-LOGIC',
+                        9,
+                        'Bad Buy Request. Missing songID[Out of client Request]'
+                    );
+                $connection = new sqlconnector();
+                $songTitle = $connection->checkSong( $_SESSION[ 'user-id' ], $_POST[ 'song-id' ]);
+                echo json_encode( ['title' => $songTitle, 'url' => exposeData( 'song', $songTitle )] );
+                break;
+
             default:
                 throw new LogException(
                     [ 'SERVICE-ANALYSIS' ],
