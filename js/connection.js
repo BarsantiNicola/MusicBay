@@ -229,7 +229,7 @@ function getData( type, selection, filter, page ){
         },
         async: false,
         success: function(data){
-            value = JSON.parse( data.substr( 1 ));
+            value = JSON.parse( data.substr( 1 ).replaceAll( "\\", ""));
         },
         error: function(data){
             alert( JSON.stringify(data ));
@@ -309,8 +309,37 @@ function getCart(){
     return value;
 }
 
+function makeOrder( data ){
+
+    let value = null;
+    $.ajax({
+
+        type: "POST",
+        url: 'php/service_logic.php',
+        data:{
+            "type": "order",
+            "CCN": data['ccn'],
+            "CVV": data['cvv' ],
+            "name": data['name'],
+            "surname":data['surname'],
+            "card-expire": data['expire']
+        },
+        async: false,
+        success: function(data){
+
+            value = JSON.parse( data.substr( 1 ));
+        },
+        error: function(data){
+
+            value = null;
+        }
+    });
+
+    return value;
+}
+
 //  Ma
-function makePayment(){
+function makePayment( transactionId ){
 
     let value = null;
     $.ajax({
@@ -319,10 +348,11 @@ function makePayment(){
         url: 'php/service_logic.php',
         data:{
                "type": "buy",
-               "transactionID" : generateString(32 )   //  just for testing purpose
+               "transactionID" : transactionId   //  just for testing purpose
         },
         async: false,
-        success: function(){
+        success: function(data){
+
             value = true;
         },
         error: function(data){
@@ -334,7 +364,7 @@ function makePayment(){
     return value;
 }
 
-function downloadSong( songID ){
+function downloadSong( songID, songTitle ){
 
     $.ajax({
 
@@ -345,11 +375,11 @@ function downloadSong( songID ){
             "song-id": songID
         },
         async: true,
-        success: function(data){
-            let downloadData = JSON.parse( data.substr( 1 ));
-            const link = document.createElement("a" );
-            link.href = downloadData[ 'url' ];
-            link.download = downloadData[ 'title' ];
+        success: function(data) {
+            var blob=new Blob([data]);
+            var link=document.createElement('a');
+            link.href=window.URL.createObjectURL(blob);
+            link.download=songTitle + ".mp3";
             link.click();
         },
         error: function(data){

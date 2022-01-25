@@ -342,7 +342,7 @@ function sanitize_source( string $src ): string{
             'Invalid source found into the database: ' . $src
         );
 
-    $src_sanitized = realpath( $src );
+    $src_sanitized = realpath( "../" . $src );
 
     if( $src_sanitized == false || strpos( $src_sanitized, $conf->general ) != 0 )
         throw new LogException(
@@ -352,7 +352,7 @@ function sanitize_source( string $src ): string{
             'Invalid source found into the database2: ' . $src
         );
 
-    return $src_sanitized;
+    return $src;
 }
 
 /**

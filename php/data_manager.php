@@ -71,8 +71,7 @@ function exposeData( string $type, string $name ): string{
         $exposedPath = '../' . $givenPath . $randName . $ext;
 
         //  file will be dropped automatically after 1m by the temp_dropper.php cron executable
-        copy( $realPath, $exposedPath );
-        return $givenPath . $randName . $ext;
+        return $realPath;
 
     }else
         throw new LogException(

@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 
 include_once( 'sql_connector.php' );
@@ -66,7 +67,7 @@ try {
                 if( isset( $_POST[ 'page' ]) && is_numeric( $_POST[ 'page' ])) {
 
                     $connector = new sqlconnector();
-                    echo json_encode( $connector->getMusic( 'default_search', $_SESSION[ 'user-id' ], null, null, $_POST[ 'page' ]));
+                    echo json_encode( $connector->getMusic( 'default_search', $_SESSION[ 'user-id' ], '', '', $_POST[ 'page' ]));
 
                 }else
                     throw new LogException(
@@ -125,8 +126,55 @@ try {
                 echo json_encode(get_cart());
                 break;
 
+            case 'order':
+
+                if( !isset( $_POST[ 'CCN' ], $_POST[ 'CVV' ], $_POST[ 'name' ], $_POST[ 'surname' ], $_POST[ 'card-expire' ] ))
+                    throw new LogException(
+                        [ 'SERVICE-ANALYSIS' ],
+                        'SERVICE-LOGIC',
+                        7,
+                        'Bad Buy Request. Missing credit card data[Out of client Request]'
+                    );
+
+                $cart = get_cart();
+
+                if( count( $cart ) != 0 ){
+
+                    $connection = new sqlconnector();
+                    do {
+                        $transaction_id = randBytes();
+                    }while( $connection->checkTransaction( $transaction_id ));
+
+                    $_SESSION[ 'order' ] = [
+                        "cart" => $cart,
+                        "transactionId" => $transaction_id,
+                        "CCN" => $_POST[ 'CCN' ],
+                        "CVV" => $_POST[ 'CVV' ],
+                        "name" => $_POST[ 'name' ],
+                        "surname" => $_POST[ 'surname' ],
+                        "card-expire" => $_POST[ 'card-expire' ],
+                        "transaction-expire" => time() + 120
+                    ];
+
+                    $price = 0;
+                    $songs = [];
+
+                    foreach( $cart as $song ) {
+                        $price += $song['price'];
+                        $songs[] = $song[ 'title' ];
+                    }
+
+                    echo json_encode( [
+                        "transactionID" => $transaction_id,
+                        "price" => $price,
+                        "cart" => $songs
+                    ]);
+
+                }
+                break;
+                
             case 'buy':
-                if( !isset( $_POST[ 'transactionID' ]))
+                if( !isset( $_POST[ 'transactionID' ], $_SESSION[ 'order' ]))
                     throw new LogException(
                         [ 'SERVICE-ANALYSIS' ],
                         'SERVICE-LOGIC',
@@ -134,15 +182,27 @@ try {
                         'Bad Buy Request. Missing transactionID[Out of client Request]'
                     );
 
-                $cart = get_cart();
 
-                if( count( $cart ) != 0 ){
-                    $connection = new sqlconnector();
-                    foreach( $cart as $song ){
-                        $connection->addPayment( $_POST[ 'transactionID' ], $_SESSION[ 'user-id' ], $song['song-id'], $song[ 'price' ]);
-                        remove_cart( $song[ 'song-id' ] );
+                if( $_SESSION[ 'order' ][ 'transaction-expire' ] > time() ){
+                    echo "checked";
+                    $cart = $_SESSION[ 'order' ][ 'cart' ];
+                    if( count( $cart ) != 0 ){
+                        $connection = new sqlconnector();
+                        foreach( $cart as $song ){
+                            $connection->addPayment(
+                                $_POST[ 'transactionID' ],
+                                $_SESSION[ 'user-id' ],
+                                $song['song-id'],
+                                $song[ 'price' ],
+                                $_SESSION[ 'order' ][ 'CCN' ],
+                                $_SESSION[ 'order' ][ 'name' ],
+                                $_SESSION[ 'order' ][ 'surname' ]
+                            );
+                            remove_cart( $song[ 'song-id' ] );
+                        }
                     }
                 }
+                echo "checked2";
                 break;
 
             case 'download':
@@ -155,7 +215,31 @@ try {
                     );
                 $connection = new sqlconnector();
                 $songTitle = $connection->checkSong( $_SESSION[ 'user-id' ], $_POST[ 'song-id' ]);
-                echo json_encode( ['title' => $songTitle, 'url' => exposeData( 'song', $songTitle )] );
+                $filename = exposeData( 'song', $songTitle );
+
+                if(file_exists($filename)){
+
+                    //Get file type and set it as Content Type
+                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                    header('Content-Type: ' . finfo_file($finfo, $filename));
+                    finfo_close($finfo);
+
+                    //Use Content-Disposition: attachment to specify the filename
+                    header('Content-Disposition: attachment; filename='.basename($filename));
+
+                    //No cache
+                    header('Expires: 0');
+                    header('Cache-Control: must-revalidate');
+                    header('Pragma: public');
+
+                    //Define file size
+                    header('Content-Length: ' . filesize($filename));
+
+                    ob_clean();
+                    flush();
+                    readfile($filename);
+
+                }
                 break;
 
             default:

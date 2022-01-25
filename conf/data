@@ -1,0 +1,7 @@
+{
+    "music": "music/",
+    "demo" : "demo/",
+    "captcha": "captcha/",
+    "img": "pics/",
+    "general" : "/var/www/html/musicbay/"
+}

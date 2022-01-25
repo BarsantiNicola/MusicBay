@@ -291,12 +291,12 @@ class sqlconnector{
      * @throws LogException           If the system is unable to execute the request
      * @return bool                   Returns true in case of success otherwise false
      */
-    public function addPayment( string $transactionID, int $userID, int $musicID, string $price ): bool{
+    public function addPayment( string $transactionID, int $userID, int $musicID, string $price, string $cnn, string $name, string $surname ): bool{
 
         try {
 
-            $stmt = $this->connection->prepare( 'INSERT INTO purchases VALUES( NULL, ?,?,?, DEFAULT, ? )' );
-            $stmt->bind_param( "iiss", $userID, $musicID, $price, $transactionID );
+            $stmt = $this->connection->prepare( 'INSERT INTO purchases VALUES( NULL, ?,?,?, DEFAULT, ?, ?, ?, ? )' );
+            $stmt->bind_param( "iisssss", $userID, $musicID, $price, $transactionID, $cnn, $name, $surname );
 
             $result = $stmt->execute();
 
@@ -382,7 +382,6 @@ class sqlconnector{
      * @return array           Returns an array containing a set of elements describing songs(sanitized)
      */
     public function getMusic( string $type, int $userID, string $filter, string $genre, int $page ): array{
-
         try{
 
             $page *= 8;   //  songs grouped by pages containing 8 elements
@@ -410,8 +409,9 @@ class sqlconnector{
                                FROM music WHERE musicid NOT IN ( select song from purchases where user=? ) LIMIT ?,8'
 
                         );
+                        echo "final";
                         $stmt->bind_param( "ii", $userID, $page );
-
+                        echo "done";
                     }else{   //  filter not applied, genre applied
 
                         $stmt = $this->connection->prepare(
@@ -470,7 +470,7 @@ class sqlconnector{
                         'title'  => strip_tags( $title ),
                         'artist' => strip_tags( $artist ),
                         'price'  => strip_tags( $price ),
-                        'song'   => sanitize_source( sqlconnector::$dataConf->music . strip_tags( $song )),
+                        'song'   => sanitize_source( sqlconnector::$dataConf->demo . strip_tags( $song )),
                         'img'    => sanitize_source( sqlconnector::$dataConf->img . strip_tags( $pic ))
                     ];
                 }
@@ -492,6 +492,42 @@ class sqlconnector{
             );
 
         }
+    }
+
+    /**
+     * @throws LogException
+     */
+    public function checkTransaction(string $transactionID ): bool{
+
+        $result = 0;
+        try{
+            $stmt = $this->connection->prepare( 'SELECT count(*) FROM purchases WHERE transactionID = ?' );
+            $stmt->bind_param( "s", $transactionID );
+
+            if( $stmt->execute() ) {
+
+                $stmt->bind_result( $result );
+                $stmt->fetch();
+
+            }
+
+            if( $result > 0 )
+                return true;
+            else
+                return false;
+
+        }catch( Exception $e ){
+
+            $stmt->close();
+            throw new LogException(
+                [ 'INTERNAL-ERROR' ],
+                'SQL-CONNECTOR',
+                3,
+                'Unable to connect to the remote execute music query: [' . $type . ':' . $userID . ':' . $filter . ':' . $genre . ':' . $page . ']'
+            );
+
+        }
+
     }
 
     /**

@@ -3,9 +3,7 @@
 	<head>
         <?php
         session_start();
-        if( isset( $_SESSION[ 'user-id' ])){
-            //  loading shopping cart
-        }else
+        if( !isset( $_SESSION[ 'user-id' ]))
             header('Location: ' . 'index.php', true, 301 );
         ?>
         <meta name="author" content="Barsanti Nicola">
@@ -32,13 +30,51 @@
                             </li>
 
                     </div>
-                    <div>
-                        <button class="payment-button" id="retry-button">Retry</button>
-                        <button class="payment-button" id="pay-button">Pay</button>
+                    <form class="payment-form-2">
+                        <h1>Insert Payment Information</h1>
+                        <label class="label-ccn">Creditcard No.
+                            <div class="inputs-field">
+                                <input class="input-ccn" name="ccn" type="tel" autocomplete="cc-number" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX">
+                                <input class="input-cvv" name="cvv" type="tel" maxlength=3 placeholder="CVV">
+                            </div>
+                        </label>
+                        <label class="label-credentials">Name on Card
+                            <div class="inputs-field">
+                                <input class="input-name" name="name" type="text" placeholder="Name">
+                                <input class="input-surname" name="surname" type="text" placeholder="Surname">
+                            </div>
+                        </label>
+                        <label class="label-expire">Card Expire
+                            <div class="inputs-field">
+                                <input class="input-expire" name="expire" type="date" class="center" date-date-format="YY/MM/DD">
+                            </div>
+                        </label>
+                        <input id="hidden-pay-songID" class="hidden-input" type="hidden" name="songID">
+                    </form>
+
+
+                </div>
+                <div class="payment-buttons">
+                    <button class="payment-button" id="retry-button">Retry</button>
+                    <button class="payment-button" id="pay-button">Pay</button>
+                </div>
+                <div class="confirm-panel">
+                    <input type="hidden" class="hidden-input" id="transaction-id">
+                    <div class="confirm">
+                        <h1>Confirm your request</h1>
+                        <p>Clicking on confirm button for complete your order:</p>
+                        <p id="order-total">Total: 5$</p>
+                        <div>
+                            <button class="payment-button" id="retry-confirm-button">Retry</button>
+                            <button class="payment-button" id="confirm-button">Confirm</button>
+                        </div>
+                    </div>
+                    <div class="result">
+                        <img id="result-pic">
+                        <p id="result"></p>
                     </div>
 
                 </div>
-
             </div>
         </div>
         <div class="container">

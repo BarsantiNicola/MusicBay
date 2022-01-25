@@ -9,6 +9,10 @@ setTimeout( function(){
     document.body.classList.remove( 'preload' );  //  with preload active => animation-times = 0
 } , 1000);  //  time necessary to the scroll animation to be completed
 
+//  wait function for animation improvement
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}
 
 ////  [PAGE LOADING]
 
@@ -44,6 +48,9 @@ function showPopup(){
 //  removes the popup displaying the main page
 function hidePopup(){
 
+    let data = extractContainerData();   //  extracting stored info
+    cleanMusicContainer();               //  clean listed songs and stored information
+    storeMusicData( data['type'], data['selection'], data['filter'], ''+(parseInt(data['page']) ));  //  update stored info
     extendSearch();
     popup.classList.add( 'disable' );
     cleanCartTable();
@@ -275,6 +282,22 @@ function showCart( value ){
     }
 }
 
+function showConfirmPopup( value ){
+
+    document.getElementById( 'transaction-id' ).value = value[ 'transactionID' ];
+    document.getElementById( 'order-total').textContent = "Total: " + value[ 'price' ] + "$";
+    document.getElementById( "pay-panel" ).classList.add( "confirm" );
+
+}
+
+function hideConfirmPopup(){
+
+    document.getElementById( 'transaction-id' ).value = '';
+    document.getElementById( 'order-total').textContent = '';
+    document.getElementById( "pay-panel" ).classList.remove( "confirm" );
+
+}
+
 //  cleans all the search inputs
 function cleanFilters(){
     filterContainer.querySelectorAll( '.input-filter' ).forEach( input => {
@@ -384,7 +407,7 @@ function addSong( songID, title, artist, songPrice, song, img ){
 
     let songBox = document.createElement( 'div' );
     songBox.classList.add( 'song-box' );
-    songBox.style.backgroundImage = 'url( pics/' + img + ')';
+    songBox.style.backgroundImage = 'url( ' + img + ')';
 
     let songInfo = document.createElement( 'div' );
     songInfo.classList.add( 'song-info' );
@@ -442,7 +465,7 @@ function addSong( songID, title, artist, songPrice, song, img ){
     }
 
     songMusic.innerHTML = '<audio controls>Your browser does not support the audio element</audio>';
-    songMusic.getElementsByTagName( 'audio' )[0].src = "demo/"+song;
+    songMusic.getElementsByTagName( 'audio' )[0].src = song;
     songInfo.appendChild( songMusic );
 
     if( songPrice !== undefined && songPrice != null && songPrice.length > 0 ){
@@ -453,7 +476,7 @@ function addSong( songID, title, artist, songPrice, song, img ){
         download.textContent = 'Download';
         download.classList.add( 'download-button' );
         download.addEventListener( 'click', function(){
-            downloadSong( songID );
+            downloadSong( songID, title );
         })
         songInfo.appendChild( download );
     }
@@ -487,7 +510,9 @@ function cleanMusicContainer(){
 document.getElementById( 'retry-button' ).addEventListener( 'click', function(event){
 
     event.preventDefault();
+    cleanCartTable();
     hidePopup();            //  hiding the popup containing the payment form
+    cleanPaymentForm();
 
 })
 
@@ -500,13 +525,169 @@ document.getElementById( 'retry-button' ).addEventListener( 'click', function(ev
 document.getElementById( 'pay-button' ).addEventListener( 'click', function(event){
 
     event.preventDefault();
-    makePayment();
-    cleanCartTable();
-    showCart(0);
-    hidePopup();
 
+    let data = checkPaymentForm();
+
+    if( data != null ) {
+        let value = makeOrder(data);
+        if (value != null) {
+            showConfirmPopup(value);
+            cleanCartTable();
+            cleanPaymentForm();
+        }
+    }
 
 })
+
+document.getElementById( 'retry-confirm-button' ).addEventListener( 'click', function( event ){
+
+    event.preventDefault();
+    hidePopup();
+    hideConfirmPopup();
+    cleanConfirmPopup();
+
+})
+
+function cleanConfirmPopup(){
+    document.getElementById( 'order-total' ).textContent = '';
+    document.getElementById( 'transaction-id' ).value = '';
+}
+
+function showConfirmSuccess(){
+
+    let panel = document.getElementsByClassName( "result" )[0];
+    panel.getElementsByTagName( 'img' )[0].src = 'img/success.png';
+    panel.getElementsByTagName( 'p' )[0].textContent = "Success!";
+    document.getElementsByClassName( "payment-panel" )[0].classList.add( "show" );
+
+}
+
+function showConfirmError(){
+
+    let panel = document.getElementsByClassName( "result" )[0];
+    panel.getElementsByTagName( 'img' )[0].src = 'img/failure.png';
+    panel.getElementsByTagName( 'p' )[0].textContent = "Payment Failed!";
+    document.getElementsByClassName( "payment-panel" )[0].classList.add( "show" );
+}
+
+function hideConfirmResult(){
+
+    document.getElementsByClassName( "payment-panel" )[0].classList.remove( "show" );
+
+}
+
+document.getElementById( 'confirm-button' ).addEventListener( 'click', function( event ){
+
+    let transactionID = document.getElementById( "transaction-id" ).value;
+    document.getElementById( "transaction-id" ).value = '';
+    event.preventDefault();
+    if( makePayment( transactionID )) {
+        showConfirmSuccess();
+        showCart(0);
+        sleep( 2000 ).then( () => {
+            hidePopup();
+            hideConfirmPopup();
+            cleanConfirmPopup();
+        })
+    }else{
+        showConfirmError();
+        sleep( 3000 ).then( () => {
+            hidePopup();
+            hideConfirmPopup();
+            cleanConfirmPopup();
+        })
+    }
+
+})
+
+//   Dynamic behaviour of ccn input, checks values are digits and autoinsert bars every 4 digits
+document.querySelector('.input-ccn').addEventListener( 'input', function() {
+
+    let text=this.value;
+    text=text.replace(/\D/g,'');    // remove illegal characters
+    if(text.length>3) text=text.replace(/.{4}/,'$&-');   // Add - at pos.5
+    if(text.length>7) text=text.replace(/.{9}/,'$&-');   // Add - at pos.10
+    if(text.length>7) text=text.replace(/.{14}/,'$&-');  // Add - at pos.15
+    this.value=text;
+
+});
+
+//   Dynamic behaviour of cvv input, checks values are digits
+document.querySelector('.input-cvv').addEventListener( 'input', function() {
+
+    let text=this.value;
+    text=text.replace(/\D/g,'');  //Remove illegal characters
+    this.value=text;
+
+});
+
+//  checks payment form inputs and extract their values. Returns null in case at least one input isn't valid
+function checkPaymentForm(){
+
+    let data = {};
+    let inputs =  paymentForm.getElementsByTagName( 'input' );
+    for( let input of inputs )
+        switch( input.name ){
+
+            case 'ccn':
+                data['ccn'] = checkCCN( input.value );
+                if( data['ccn'] == null ) return null;
+                break;
+
+            case 'cvv':
+                data['cvv'] = checkCVV( input.value );
+                if( data['cvv'] == null ) return null;
+                break;
+
+            case 'name':
+                if( input.value.length > 0 )
+                    data['name'] = input.value;
+                else
+                    return null;
+                break;
+
+            case 'surname':
+                if( input.value.length > 0 )
+                    data['surname'] = input.value;
+                else
+                    return null;
+                break;
+
+            case 'expire':
+                data['expire'] = input.value;
+                break;
+
+            default:
+                break;
+        }
+
+    return data;
+}
+
+//  checks the ccn is valid. Returns the ccn or null in case is invalid
+function checkCCN( value ){
+
+    if( value.length != 19 ) return null;  //  ccn must be 19 char(plus -)
+    value = value.replaceAll( '-', '' );   //  removing the bars
+    if( /^\d+$/.test( value ))             //  verify all chars are numbers
+        return value;
+
+    return null;
+
+}
+
+//  checks the cvv is valid. Returns the cvv or null in case is invalid
+function checkCVV( value ){
+
+    if( value.length != 3 ) return null;
+    return /^\d+$/.test( value )? value : null;
+
+}
+
+//  cleans the payment form inputs
+function cleanPaymentForm(){
+    paymentForm.querySelectorAll( 'input' ).forEach( input => input.value = '' );
+}
 
 
 

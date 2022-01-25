@@ -123,7 +123,7 @@ i.fa-home{
 
 i.fa-home:hover{
     color:rgb(4, 206, 233);
-    font-size: 35px;
+    font-size: 47px;
 }
 
 i.fa-search{
@@ -366,7 +366,7 @@ i.fa-shopping-cart.active:hover{
 }
 
 .song-info label{
-    font-size: 17px;
+    font-size: 13px;
     font-weight: bold;
     height: 25px;
     width: 180px;
@@ -416,8 +416,9 @@ audio{
     margin-top: 5px;
     margin-left: 100px;
 }
+
 .song-title, .song-artist, .song-album{
-    font-size: 12px;
+    font-size: 11px;
     padding-left: 2px;
     color: white;
 }
@@ -499,7 +500,7 @@ audio{
 }
 
 .payment-panel{
-    padding: 30px 0px 0px 50px;
+    padding: 30px 0 0 0;
     width: 500px;
     height: 600px;
     margin: 50px auto auto auto;
@@ -519,6 +520,75 @@ audio{
     text-align: center;
 }
 
+.payment-form{
+    margin: 30px auto 30px auto;
+
+    width: 800px;
+    height: 260px;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 100px 35px 35px 35px 35px;
+    grid-template-columns: 400px;
+}
+
+.payment-form label{
+    font-size: 12px;
+    display: flex;
+    padding-left: 80px;
+    flex-direction: row;
+}
+
+.payment-form input{
+    font-size:10px;
+    padding:0px;
+    margin: 0px;
+}
+
+input.input-ccn{
+    width: 130px;
+}
+
+input.input-cvv{
+    width: 35px;
+}
+
+.center {
+    text-align: center;
+}
+
+input[type=date]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    display: none;
+}
+
+input[type=date]::-webkit-calendar-picker-indicator {
+    -webkit-appearance: none;
+    display: none;
+}
+
+input.input-expire *{
+    min-width: 70px;
+    font-size:6px;
+    height: 10px;
+
+}
+
+.inputs-field{
+    padding-left: 30px;
+}
+
+label.label-credentials .inputs-field{
+    padding-left: 32px;
+}
+
+label.label-expire .inputs-field{
+    padding-left: 47px;
+}
+
+label.label-credentials input{
+    width: 80px;
+}
+
 .payment-button{
     font-size: 14px;
     padding: 8px 15px;
@@ -528,7 +598,7 @@ audio{
     display: flex;
     flex-direction: column;
     width: 400px;
-    height: 400px;
+    height: 360px;
     overflow: hidden;
 }
 
@@ -598,7 +668,7 @@ label.label-credentials input{
 	font-size: 10px;
 	font-weight: bold;
 	padding: 12px 20px;
-    margin: 10px 120px 0px 60px;
+    margin: 10px 120px 0px 110px;
 	letter-spacing: 1px;
 	text-transform: uppercase;
 	transition: transform 80ms ease-in;
@@ -639,10 +709,87 @@ label.label-credentials input{
     margin-left: 40px;
 }
 
+.payment-panel.confirm{
+    height: 400px;
+    margin-top:150px;
+    transition: all .3s linear;
+}
+
+.payment-panel.confirm .confirm-panel{
+    display: inline;
+}
+
+.payment-panel.confirm.show .confirm{
+    display: none;
+}
+
+#result-pic{
+    height: 150px;
+    width: 150px;
+    margin-left: 120px;
+}
+
+#result{
+    font-size: 20px;
+    font-weight: bold;
+    width:400px;
+    text-align: center;
+}
+
+.confirm{
+    display: flex;
+    flex-direction: column;
+}
+
+.result{
+    display: none;
+    opacity: 0;
+}
+
+.payment-panel.confirm.show .result{
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    transition: opacity 2s ease-out;
+}
+
+.payment-panel.confirm.show .result{
+    display: flex;
+    flex-direction: column;
+}
+
+.confirm-panel{
+    display:none;
+    padding: 60px 0 0 50px;
+}
+
+.confirm-panel p{
+    font-size:14px;
+}
+
+#order-total{
+    font-weight: bold;
+}
+.payment-panel.confirm .payment-form{
+    display: none;
+}
+
+.payment-panel.confirm .payment-buttons{
+    display: none;
+}
+
+
 .payment-panel.active-otp-form .payment-form{
 	display: none;
 }
 
+#retry-confirm-button{
+    margin-left: 60px;
+    margin-right: 100px;
+    margin-top: 30px;
+    background-color: gray;
+    border: 1px solid #B7B7B7;
+}
 #undo-otp-button{
     border-radius: 20px;
 	border: 1px solid #B7B7B7;
