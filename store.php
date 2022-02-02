@@ -2,9 +2,8 @@
 <html>
 	<head>
         <?php
-        session_start();
-        if( !isset( $_SESSION[ 'user-id' ]))
-            header('Location: ' . 'index.php', true, 301 );
+            //if( !isset( $_SESSION[ 'user-id' ]))
+                //header('Location: ' . 'index.php', true, 301 );
         ?>
         <meta name="author" content="Barsanti Nicola">
     	<meta charset="UTF-8">

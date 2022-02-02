@@ -6,65 +6,90 @@ const rightPanel = document.getElementById( 'right-panel' );     //  right panel
 
 ////  PAGE MANAGEMENT
 
-//  Shows the primary panel of left and right side
+/**  Shows the primary panel of left and right side
+ * @param type Can assume 'left' or 'right'[other inputs will be seen as right]
+ */
 function showPrimaryPanel( type ){
 
-    if( type == 'left' )
+    if( type === 'left' )
         leftPanel.classList.remove( 'left-panel-active' );
     else    
         rightPanel.classList.remove( 'right-panel-active' );
 
 }
 
-//  Shows the secondary panel of left and right side
+/**  Shows the secondary panel of left and right side
+ * @param type Can assume 'left' or 'right'[other inputs will be seen as right]
+ */
 function showSecondaryPanel( type ){
-    if( type == 'left' ){
+
+    if( type === 'left' )
         leftPanel.classList.add( 'left-panel-active' );
-    }else
-        rightPanel.classList.add( 'right-panel-active' );   
+    else
+        rightPanel.classList.add( 'right-panel-active' );
+
 }
 
-//  shows password change form on left side
+/**
+ * Shows the password Change Form on the Left Panel
+ */
 function setToPassword(){
 
 	document.getElementById( 'left-panel' ).classList.add( 'password-panel-active' );
 
 }
 
-//  shows login form on left side
+/**
+ * Shows the login Form on the Left Panel
+ */
 function setToLogin(){
 
 	document.getElementById( 'left-panel' ).classList.remove( 'password-panel-active' );
+
 }
 
 //  shows messages on the response outputs.
 //   - type: define the color of the message. Can be 'success' or 'error'
 //   - request: define the type of form in which print the message. Can be 'login', 'registration', 'activation, 'password_change'
 //   - time: seconds after the removing of the message
+/**
+ * Shows messages on the forms
+ * @param type     Can be 'success' or 'error'. Other inputs will be seen as 'error'
+ * @param request  Form type. Can be 'login', 'registration', 'activation', 'password_change'
+ * @param message  Message to be displayed
+ * @param time     Seconds before the message will be automatically removed
+ */
 function showMessage( type, request, message, time ){
 
     let tag = null;
     switch( request ){  //  three forms available
+
         case 'login':
             tag = document.getElementById( 'login-show' );
             break;
-        case 'registration':
-        case 'activation':
+
+        case 'registration': case 'activation':
             tag = document.getElementById( 'registration-show' );
             break;
+
         case 'password_change':
             tag = document.getElementById( 'password-show' );
             break;
+
         default:
             return;
     }
 
-    if( type == 'success' ){
+    if( type === 'success' ){
+
         tag.classList.remove( 'error' );  //  clean possible remaining tag
         tag.classList.add( 'success' );
+
     }else{
+
         tag.classList.remove( 'success' ); //  clean possible remaining tag
         tag.classList.add( 'error' );
+
     }
 
     tag.textContent = message;
@@ -80,14 +105,10 @@ function showMessage( type, request, message, time ){
 ////  INPUTS CHECKS
 
 //  input check used for numerical only inputs
-function onlyNumberCheck( event ){
-	return event.keyCode > 47 && event.keyCode < 58;
-}
+function onlyNumberCheck( event ){ return event.keyCode > 47 && event.keyCode < 58; }
 
 //  input check used for text only inputs
-function usernameCheck( event ){
-	return event.keyCode > 32 && event.keyCode < 128;
-}
+function usernameCheck( event ){ return event.keyCode > 32 && event.keyCode < 128; }
 
 //  evaluation of the score of a password by the zxcvbn module
 function passwordEvaluation( input, data, event ){
@@ -201,7 +222,7 @@ function checkPasswordForm(){
     if( username == null || password == null )  //  if some info missing do nothing
         return null;
     else
-        return { 'username': username, 'password': password, 'type':'password-change' }; //  data to be forwarded to the Captcha form
+        return { 'username': username, 'password': password, 'type':'password-change' }; //  data to be forwarded to the otp form
 
 }
 
@@ -276,149 +297,6 @@ function cleanRegistrationForm(){
 }
 
 
-////  CAPTCHA form management
-
-let captcha_value = new Array(16);  //  global captcha value from which derive the auth key applying captcha_mask
-let captcha_mask = '';   //  global mask to be applied on the captcha form[shared by both captcha forms]
-
-//  Loads reaction on images of components of the captchas
-function CaptchaLoad(){
-	
-	const captchas = document.getElementsByClassName( 'captcha_subimg' );
-
-	globalThis.captcha_mask = new Array( 16 );  
-	globalThis.captcha_value = '';
-
-	for( let i = 0; i<captchas.length; i++ )
-		captchas[i].addEventListener( 'click', function(){
-
-			globalThis.captcha_mask[i%16] = globalThis.captcha_mask[i%16] == 0? 1 : 0; //  clicking will generate a mask to be applied on the captcha key
-			if( this.classList.contains( 'active-captcha' ))  //  showing image clicked[binary logic]
-				this.classList.remove( 'active-captcha' );
-			else
-				this.classList.add( 'active-captcha' );
-
-		});
-	
-}
-
-//  Requests to the server a new captchas and display the retrieved information
-function loadCaptchaInformation( type ){
-
-    let response = getCaptcha( type );  //  request the information to the server
-    if( response == null )
-        return;
-
-    let identificator = 'captcha_' + type + '_';
-
-    //  insertion of captcha-id information into the captcha form
-    document.getElementById( 'captcha-' + type + '-container' ).querySelectorAll( '.hidden-input' ).forEach( input => {
-        if( input.name == 'captcha-id' ) input.value = response[ 'captcha-id' ];
-    })
-    globalThis.captcha_value = response[ 'captcha-value' ];
-    document.getElementById( 'captcha-' + type + '-container' ).getElementsByTagName( 'th' )[0].textContent = response[ 'captcha-clue' ];
-
-    //  displaying the images into the captcha form
-    for( let y = 0; y<4; y++ )
-        for( let x = 0; x<4; x++ )
-            document.getElementById( identificator + y + "_" + x ).src = response['captcha-content'][x+''+y];
-    showCaptchaLoad( false );  //  removing the loading icon
-            
-}
-
-//  Generates the captcha key starting from a captcha_value and a mask to be applied on
-//  Only character corresponding to a 0 value mask will be concatenated to generate the authentication key
-function generateCaptchaValue(){
-
-	let value ='';
-	for( let i = 0; i<globalThis.captcha_mask.length; i++ ){
-        if( globalThis.captcha_mask[i] == 0 )     //  more secure removing the selected box not viceversa(higher key value length)
-            value = value + globalThis.captcha_value[i];
-        globalThis.captcha_mask[i] = 0;         //  immediately dropping all the info needed to recover the key[low low low security improval but better]
-    }
-	return value;
-}
-
-//  Loads/removes an animation on captcha for loading
-function showCaptchaLoad( state ){
-    if( state == true ){
-        document.querySelectorAll( '.loading-captcha' ).forEach( element => element.classList.add( 'ready' ));
-        document.querySelectorAll( '.captcha-box' ).forEach( element => element.classList.remove( 'ready' ));
-    }else{
-        document.querySelectorAll( '.loading-captcha' ).forEach( element => element.classList.remove( 'ready' )); 
-        document.querySelectorAll( '.captcha-box' ).forEach( element => element.classList.add( 'ready' ));   
-    }
-}
-
-//  Shows/Hides the animation on captcha for loading(preventing to see strange behaviour of flex)
-function unlockCaptchaLoad( state ){
-    if( state == true )
-        document.querySelectorAll( '.loading-captcha' ).forEach( element => element.getElementsByTagName( 'img' )[0].classList.add( 'ready' )); 
-    else
-        document.querySelectorAll( '.loading-captcha' ).forEach( element => element.getElementsByTagName( 'img' )[0].classList.remove( 'ready' ));     
-}
-
-//  Shows the captcha form and inizialize its data
-function showCaptcha( type, data ){
-
-    let captchaForm = document.getElementById( 'captcha-' + type + '-container' );
-    globalThis.captcha_mask = new Array(16);
-    for( let i = 0; i<16; i++ )
-        globalThis.captcha_mask[i] = 0;
-  
-    captchaForm.querySelectorAll( '.hidden-input' ).forEach( input => { 
-        switch( input.name ){
-
-            case 'username':
-                input.value = data[ 'username' ];
-                break;
-                
-            case 'password':
-                input.value = data[ 'password' ];
-                break;
-                
-            case 'type':
-                input.value = data[ 'type' ];
-                break;
-                
-            case 'phone':
-                input.value = data[ 'phone' ];
-                break;    
-
-            default:
-                break;  
-
-        } 
-    });
-
-    document.getElementById( 'otp-' + type +'-container' ).classList.remove( 'active-otp-form' );  // can be present from previous executions
-    captchaForm.classList.add( 'active-otp-form' );  //  enable CSS transition to show Captcha Form
-
-}
-
-//  cleans the captcha form inputs
-function cleanCaptchaForms(){
-
-    showCaptchaLoad( false );
-    unlockCaptchaLoad( false );
-	captcha_value = '';  //  resetting the captcha value
-    for( let i = 0; i< captcha_mask.length; i++ ) captcha_mask[i] = 0;  //  resetting captcha_mask
-
-    //  resetting captcha images
-	document.querySelectorAll( '.captcha_subimg' ).forEach(( captcha ) => { 
-		captcha.classList.remove( 'active-captcha' );
-		captcha.src = '';
-	});
-
-    //  resetting captcha tip
-    document.querySelectorAll( 'th' ).forEach( header => header.textContent = '' );
-    
-    //  resetting stored information
-	document.querySelectorAll( '.captcha-box > .hidden-input' ).forEach( input => input.value = '' );
-
-
-}
-
 ////  OTP form management
 
 const leftOTPInputs = document.getElementById( 'otp-left' ).querySelectorAll( '.hidden-input' );    //  left otp inputs
@@ -428,7 +306,7 @@ const rightOTPInputs = document.getElementById( 'otp-right' ).querySelectorAll( 
 function showOtp( type, data ){
 
     if( type == 'right' ){
-        if( !registration( data['username'], data['password'], data['phone'], data['captcha-id'], data['captcha-value'])){
+        if( !registration( data['username'], data['password'], data['phone'])){
             showPrimaryPanel( type );
             return;
         }
@@ -454,14 +332,6 @@ function showOtp( type, data ){
 
             case 'phone':
                 input.value = data[ 'phone' ];
-                break;
-
-            case 'captcha-id':
-                input.value = data[ 'captcha-id' ];
-                break;
-
-            case 'captcha-value':
-                input.value = data[ 'captcha-value' ];
                 break;
 
             case 'otp-id':
@@ -521,15 +391,7 @@ function otpDataExtraction( type ){
             case 'phone':
                 data['phone'] = input.value;
                 break;
-                
-            case 'captcha-id':
-                data['captcha-id'] = input.value;
-                break;
-                
-            case 'captcha-value':
-                data['captcha-value'] = input.value;
-                break;
-                
+
             case 'otp-id':
                 data['otp-id'] = input.value;
                 break;

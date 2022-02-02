@@ -51,7 +51,7 @@ try{
             case 'registration':
 
                 //  checking all the message fields are present
-                if( isset( $_POST[ 'username' ], $_POST[ 'password' ], $_POST[ 'phone' ], $_POST[ 'captcha-id' ], $_POST[ 'captcha-value' ])){
+                if( isset( $_POST[ 'username' ], $_POST[ 'password' ], $_POST[ 'phone' ])){
 
                     //  sanitization of tainted data
                     sanitize_registration(
@@ -61,9 +61,6 @@ try{
                         $_POST[ 'captcha-id' ],
                         $_POST[ 'captcha-value' ]
                     );
-
-                    //  verification of captcha session information presence and eventual check
-                    check_captcha( $_POST[ 'captcha-id' ], $_POST[ 'captcha-value' ]);
 
                     //  caching registration information for activation phase[only after that will be stored]
                     $_SESSION[ 'registration-username' ] = $_POST[ 'username' ];
@@ -131,27 +128,23 @@ try{
             case 'change_password':
 
                 //  checking all the message fields are present
-                if( isset( $_POST["username"], $_POST["password"], $_POST["captcha-id"], $_POST["captcha-value"], $_POST["otp-id"], $_POST["otp-value"] )){
+                if( isset( $_POST["username"], $_POST["password"], $_POST["old-password"], $_POST["otp-id"], $_POST["otp-value"] )){
 
                     //  sanitization of tainted data and check of registration cached information presence
                     sanitize_password_change(
                         $_POST["username"],
                         $_POST["password"],
+                           $_POST["old-password"],
                            $_POST["otp-id"],
-                         $_POST["otp-value"],
-                         $_POST["captcha-id"],
-                        $_POST["captcha-value"]
+                         $_POST["otp-value"]
                     );
-
-                    //  verification of captcha session information presence and eventual check
-                    check_captcha( $_POST["captcha-id"], $_POST["captcha-value"] );
 
                     //  verification of otp session information presence and eventual check
                     check_otp( $_POST["otp-id"], $_POST["otp-value"] );
 
                     //  change of the password
                     $mySqlConnection = new sqlconnector();
-                    if( !$mySqlConnection->changePassword( $_POST[ "username" ], $_POST[ "password" ]))
+                    if( !$mySqlConnection->changePassword( $_POST[ "username" ], $_POST[ "old-password" ], $_POST[ "password" ]))
                         throw new LogException(
                             [ 'INTERNAL-ERROR' ],
                             'FRONTEND-LOGIC',

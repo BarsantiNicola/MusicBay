@@ -2,9 +2,9 @@
 
 session_start();
 
-include_once('sql_connector.php');
-include_once( 'security.php');
-include_once( 'data_manager.php' );
+include_once( 'sql_connector.php' );   //  database management
+include_once( 'security.php');         //  security functionalities [sanitization/checks/randomization]
+include_once( 'data_manager.php' );    //  data management [extraction of data from system]
 
 try {
 

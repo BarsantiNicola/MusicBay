@@ -1,7 +1,7 @@
 <<?php
 
-include_once( 'data_manager.php' );
-include_once( 'security.php' );
+include_once( 'data_manager.php' );   //  EXCEPTION RAISED FOR LOG FUNCTIONALITIES
+include_once( 'security.php' );       //  SECURITY FUNCTIONALITIES[SANITIZATION/RANDOMIZATION]
 
 /**
  * Module in charge of establishing a connection with a local mySQL database and perform all the operations
@@ -12,6 +12,7 @@ class sqlconnector{
     private $connection;             //  connection to the local database
     private static $conf = null;     //  configuration of the subsystem
     private static $dataConf = null; //  configuration of the data management
+
     /**
      * Constructor of the class. Generates a connection with the configured mySQL database
      */
@@ -43,115 +44,7 @@ class sqlconnector{
 
     }
 
-    /**
-     * Gives a captcha starting from an index. It is used to select randomly a captcha with the usage of getMaxCaptcha
-     *
-     * @param  string $id   Position of the captcha the retrieve
-     * @throws LogException If the system is unable to retrieve the given captcha or retrieves invalid information
-     * @return array        A dictionary containing the captcha information[src,clue,mask](all sanitized except src)
-     */
-    public function getCaptcha( string $id ): array{
-
-        try {
-
-            $stmt = $this->connection->prepare( 'SELECT src, clue, mask FROM captchas LIMIT ?,1' );
-            $stmt->bind_param( "i", $id );
-
-            if( $stmt->execute()){
-
-                $stmt->bind_result( $src, $clue, $mask ); //  one result, captchaID is PK
-                $stmt->fetch();
-
-                //  we consider the database untrusted so we have to check:
-                //      - fields doesn't contain html tags(XSS attack)
-                //      - src is placed inside the correct folder(private file stole)
-                //      - mask si valid(just to be sure)
-                $result = [ 'src' => strip_tags( $src ), 'clue' => strip_tags( $clue ), 'mask' => sanitize_mask( strip_tags( $mask ))];
-
-                if( $result[ 'src' ] == null || strlen( $result[ 'src' ]) == 0 )
-                    throw new LogException(
-                        [ 'INTERNAL-ERROR' ],
-                        'SQL-CONNECTOR',
-                        0,
-                        'Unable to retrieve the captcha with id -> ' . $id
-                    );
-
-            }else{
-
-                $stmt->close();
-                throw new LogException(
-                    [ 'INTERNAL-ERROR' ],
-                    'SQL-CONNECTOR',
-                    0,
-                    'Unable to execute the query for getting a captcha with id -> ' . $id
-                );
-            }
-
-            return $result;
-
-        }catch( LogException $e ){
-            throw $e;
-
-        }catch( Exception $e ){
-
-            throw new LogException(
-                [ 'INTERNAL-ERROR' ],
-                'SQL-CONNECTOR',
-                3,
-                'Unable to connect to the remote mySQL database to retrieve captcha ' . $id
-            );
-        }
-    }
-
-    /**
-     * Retrieval of max captchaID[used by upper layer for random captcha selection between 0,maxID]
-     *
-     * @throws LogException  If the system is unable to retrieve the max captcha ID
-     * @return int           The max captchaID retrievable(sanitized)
-     */
-    public function getMaxCaptcha(): int{
-
-        try {
-
-            $stmt = $this->connection->prepare('SELECT COUNT(*) as "max" FROM captchas' );
-
-            if ($stmt->execute()) {
-
-                $stmt->bind_result( $max );  //  only one result(aggregation op. without grouping)
-                $stmt->fetch();
-                $stmt->close();
-
-            } else {
-
-                $stmt->close();
-                throw new LogException(
-                    [ 'INTERNAL-ERROR' ],
-                    'SQL-CONNECTOR',
-                    3,
-                    'Unable to execute the query for getting the max captcha value'
-                );
-
-            }
-
-            return $max;  //  we don't need to check/sanitize the result( obtained from count operator )
-
-        }catch( LogException $e ){
-            throw $e;
-        }catch( Exception $e ){
-
-            throw new LogException(
-                [ 'INTERNAL-ERROR' ],
-                'SQL-CONNECTOR',
-                3,
-                'Unable to connect to the remote mySQL database to retrieve max captcha'
-            );
-
-        }
-    }
-
-    /**
-     * Registers a new user inside the database
-     *
+    /**  Registers a new user inside the database
      * @param  string $username  Username of the user to be registered into the database
      * @param  string $password  Password associated to the user
      * @param  string $phone     Phone associated to the user
@@ -173,10 +66,11 @@ class sqlconnector{
 
         }catch( Exception $e ){
 
+            $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
-                3,
+                0,
                 'Unable to connect to the remote mySQL database to register new user ' . $username
             );
         }
@@ -221,27 +115,28 @@ class sqlconnector{
                 throw new LogException(
                     [ 'INTERNAL-ERROR' ],
                     'SQL-CONNECTOR',
-                    3,
+                    0,
                     'Unable to connect to the remote mySQL database to perform login of ' . $username . ' -> ' . $password
                 );
             }
 
         }catch( LogException $e ){
-            throw $e;
-        }catch( Exception $e ){
 
+            $stmt->close();
+            throw $e;
+
+        }catch( Exception $e ){
+            $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
-                3,
+                0,
                 'Unable to connect to the remote mySQL database to perform login of ' . $username . ' -> ' . $password
             );
         }
     }
 
-    /**
-     * Performs the change of the user password if the oldPassword match
-     *
+    /**  Performs the change of the user password if the oldPassword match
      * @param  string $username      Name of the username to which change the password
      * @param  string $old_password  Old password of the user
      * @param  string $password      New password to be set
@@ -274,16 +169,14 @@ class sqlconnector{
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
-                3,
+                0,
                 'Unable to connect to the remote mySQL database for password change for user ' . $username
             );
 
         }
     }
 
-    /**
-     * Adds a song to the user archive by registering his payment
-     *
+    /**  Adds a song to the user archive by registering his payment
      * @param  string $transactionID  Id of the recorded transaction
      * @param  int    $userID         UserID representing the user
      * @param  int    $musicID        MusicID associated with the music to be acquired
@@ -309,16 +202,14 @@ class sqlconnector{
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
-                3,
+                0,
                 'Unable to connect to the remote mySQL database for add payment to user ' . $userID
             );
 
         }
     }
 
-    /**
-     * Checks if a songs exists and can be purchased by a user
-     *
+    /**  Checks if a songs exists and can be purchased by a user
      * @param  int $userId  Id of the user which wants to buy the song
      * @param  int $songId  Id of the music to buy
      * @throws LogException If the system is unable to execute the request
@@ -341,7 +232,7 @@ class sqlconnector{
                     throw new LogException(
                         [ 'MUSIC-STOLE-TRIAL', 'SERVICE-ANALYSIS' ],
                         'SQL-CONNECTOR',
-                        9,
+                        3,
                         'Invalid song check. The song ' . $songId . ' not found on user ' . $userId
                     );
 
@@ -351,28 +242,29 @@ class sqlconnector{
                 throw new LogException(
                     [ 'INTERNAL-ERROR' ],
                     'SQL-CONNECTOR',
-                    2,
+                    0,
                     'Error during the execution of a song check on user ' . $userId . ' for song ' . $songId
                 );
 
         }catch( LogException $e ){
+
+            $stmt->close();
             throw $e;
+
         }catch( Exception $e ){
 
             $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
-                3,
+                0,
                 'Unable to connect to the remote mySQL database for checking song presence -> ' . $songId
             );
 
         }
     }
 
-    /**
-     * Searches music inside the database
-     *
+    /**  Searches music inside the database
      * @param  string $type    Type of search to execute[default_search/search] -> user's songs search/all songs search
      * @param  int    $userID  Id of the user in which search music(for default_search)
      * @param  string $filter  Filter to be applied on the song(search)
@@ -409,9 +301,9 @@ class sqlconnector{
                                FROM music WHERE musicid NOT IN ( select song from purchases where user=? ) LIMIT ?,8'
 
                         );
-                        echo "final";
+
                         $stmt->bind_param( "ii", $userID, $page );
-                        echo "done";
+
                     }else{   //  filter not applied, genre applied
 
                         $stmt = $this->connection->prepare(
@@ -480,27 +372,31 @@ class sqlconnector{
             return $data;
 
         }catch( LogException $e ){
+
+            $stmt->close();
             throw $e;
+
         }catch( Exception $e ){
 
             $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
-                3,
+                0,
                 'Unable to connect to the remote execute music query: [' . $type . ':' . $userID . ':' . $filter . ':' . $genre . ':' . $page . ']'
             );
 
         }
     }
 
-    /**
-     * @throws LogException
+    /**  Checks if the transactionID is already assigned to another purchase
+     * @throws LogException  In case of connection error
      */
-    public function checkTransaction(string $transactionID ): bool{
+    public function checkTransaction( string $transactionID ): bool{
 
         $result = 0;
         try{
+
             $stmt = $this->connection->prepare( 'SELECT count(*) FROM purchases WHERE transactionID = ?' );
             $stmt->bind_param( "s", $transactionID );
 
@@ -511,6 +407,7 @@ class sqlconnector{
 
             }
 
+            $stmt->close();
             if( $result > 0 )
                 return true;
             else
@@ -522,7 +419,7 @@ class sqlconnector{
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
-                3,
+                0,
                 'Unable to connect to the remote execute music query: [' . $type . ':' . $userID . ':' . $filter . ':' . $genre . ':' . $page . ']'
             );
 
@@ -530,9 +427,7 @@ class sqlconnector{
 
     }
 
-    /**
-     * Gets detailed information of a song given its id(used by cart management)
-     *
+    /**  Gets detailed information of a song given its id(used by cart management)
      * @param  int $songID  Id of the music from which retrieve information
      * @throws LogException In case the songID isn't present inside the database
      */
@@ -573,14 +468,17 @@ class sqlconnector{
             ];
 
         }catch( LogException $e ){
+
+            $stmt->close();
             throw $e;
+
         }catch( Exception $e ){
 
             $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
-                3,
+                0,
                 'Unable to connect to make songID request. Song ' . $songID . ' not present'
             );
 
@@ -611,22 +509,25 @@ class sqlconnector{
             $stmt->close();
             if ($phone == null || strlen($phone) == 0)
                 throw new LogException(
-                    ['SERVICE-ANALYSIS', 'BRUTE-FORCING', 'USER-ERROR'],
+                    [ 'SERVICE-ANALYSIS', 'BRUTE-FORCING', 'USER-ERROR' ],
                     'SQL-CONNECTOR',
-                    4,
+                    1,
                     'Invalid phone number request. User ' . $username . ' not present'
                 );
             return $phone;
 
         }catch( LogException $e ){
+
+            $stmt->close();
             throw $e;
+
         }catch( Exception $e ){
 
             $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
-                3,
+                0,
                 'Unable to connect to database to obtain phone number. User ' . $username . ' not present'
             );
 

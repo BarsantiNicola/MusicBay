@@ -57,51 +57,6 @@
                     <button class="check-otp-button">Confirm</button>
                 </div>
             </form>
-            <div class="loading-captcha">
-                <img src='img/loading.gif' alt="#">
-            </div>
-            <form action="#" id="captcha-right-container" class="captcha-box right">
-                <h1>Captcha Verification</h1>
-                <table class="captcha-table">
-                    <thead>
-                    <tr>
-                        <th colspan='4'></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td><img class="captcha_subimg" id="captcha_right_0_0" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_0_1" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_0_2" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_0_3" alt=""></td>
-                    </tr>
-                    <tr>
-                        <td><img class="captcha_subimg" id="captcha_right_1_0" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_1_1" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_1_2" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_1_3" alt=""></td>
-                    </tr>
-                    <tr>
-                        <td><img class="captcha_subimg" id="captcha_right_2_0" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_2_1" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_2_2" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_2_3" alt=""></td>
-                    </tr>
-                    <tr>
-                        <td><img class="captcha_subimg" id="captcha_right_3_0" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_3_1" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_3_2" alt=""></td>
-                        <td><img class="captcha_subimg" id="captcha_right_3_3" alt=""></td>
-                    </tr>
-                    </tbody>
-                </table>
-                <input class="hidden-input" type="hidden" name="username">
-                <input class="hidden-input" type="hidden" name="password">
-                <input class="hidden-input" type="hidden" name="captcha-id">
-                <input class="hidden-input" type="hidden" name="phone">
-                <input class="hidden-input" type="hidden" name="type">
-                <button class="captcha-check">Check</button>
-            </form>
         </div>
     </div>
     <div class="form-container sign-in-container" id="left-panel">
@@ -155,50 +110,6 @@
                     <button class="undo-otp-button">Back</button>
                     <button class="check-otp-button">Confirm</button>
                 </div>
-            </form>
-            <div class="loading-captcha">
-                <img src='img/loading.gif' alt="#">
-            </div>
-            <form action="#" id="captcha-left-container" class="captcha-box left">
-                <h1>Captcha Verification</h1>
-                <table class="captcha-table">
-                    <thead>
-                    <tr>
-                        <th colspan='4'></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td><img class="captcha_subimg" id="captcha_left_0_0"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_0_1"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_0_2"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_0_3"></td>
-                    </tr>
-                    <tr>
-                        <td><img class="captcha_subimg" id="captcha_left_1_0"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_1_1"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_1_2"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_1_3"></td>
-                    </tr>
-                    <tr>
-                        <td><img class="captcha_subimg" id="captcha_left_2_0"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_2_1"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_2_2"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_2_3"></td>
-                    </tr>
-                    <tr>
-                        <td><img class="captcha_subimg" id="captcha_left_3_0"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_3_1"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_3_2"></td>
-                        <td><img class="captcha_subimg" id="captcha_left_3_3"></td>
-                    </tr>
-                    </tbody>
-                </table>
-                <input class="hidden-input" type="hidden" name="username">
-                <input class="hidden-input" type="hidden" name="password">
-                <input class="hidden-input" type="hidden" name="captcha-id">
-                <input class="hidden-input" type="hidden" name="type">
-                <button class="captcha-check">Check</button>
             </form>
         </div>
     </div>

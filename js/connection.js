@@ -59,29 +59,6 @@ function getOTP( username ){
 
 }
 
-//  Request an OTP check to the server, username is not necessary cause is known by the server. 
-//  The server will reply with an OTP identificator(like a requestID but to identify OTPs requests)
-function getUnnamedOTP(){
-
-    let value = null;
-    $.ajax({
-
-        type: "POST",
-        url: 'php/otp_logic.php',
-        data:{ "type": "unnamed" },
-        async: false,
-        success: function( data ){
-            value = data.substr(1);
-        },
-        error: function(){
-            value = null;
-        }
-    });
-
-    return value;
-
-}
-
 //  Check user credentials to perform access to the store
 function login( username, passwordHash, otpID, otpValue ){
 
@@ -230,10 +207,6 @@ function getData( type, selection, filter, page ){
         async: false,
         success: function(data){
             value = JSON.parse( data.substr( 1 ).replaceAll( "\\", ""));
-        },
-        error: function(data){
-            alert( JSON.stringify(data ));
-
         }
     });
 
@@ -257,10 +230,6 @@ function addToCart( songID ){
         success: function(data){
             showCart(parseInt( data.substr( 1 )))
         },
-        error: function(data){
-            alert( JSON.stringify(data ));
-
-        }
     });
 
     return value;
@@ -279,8 +248,7 @@ function removeFromCart(songID){
         async: false,
         success: function(data){
             showCart(parseInt( data.substr( 1 )))
-        },
-        error: function(){}
+        }
 
     });
 }
@@ -299,10 +267,6 @@ function getCart(){
         async: false,
         success: function(data){
             value = JSON.parse( data.substr( 1 ));
-
-        },
-        error: function(data){
-            alert( JSON.stringify(data ));
 
         }
     });
@@ -329,7 +293,7 @@ function makeOrder( data ){
 
             value = JSON.parse( data.substr( 1 ));
         },
-        error: function(data){
+        error: function(){
 
             value = null;
         }
@@ -351,12 +315,11 @@ function makePayment( transactionId ){
                "transactionID" : transactionId   //  just for testing purpose
         },
         async: false,
-        success: function(data){
+        success: function(){
 
             value = true;
         },
-        error: function(data){
-            alert( JSON.stringify(data) );
+        error: function(){
             value = false;
         }
     });
@@ -376,15 +339,13 @@ function downloadSong( songID, songTitle ){
         },
         async: true,
         success: function(data) {
-            var blob=new Blob([data]);
-            var link=document.createElement('a');
+
+            let blob=new Blob([data]);
+            let link=document.createElement('a');
             link.href=window.URL.createObjectURL(blob);
             link.download=songTitle + ".mp3";
             link.click();
         },
-        error: function(data){
-            alert(JSON.stringify(data));
-        }
     });
 
 }

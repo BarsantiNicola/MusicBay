@@ -2,12 +2,19 @@
 
 session_start();
 
-include_once( 'sql_connector.php' );
-include_once( 'security.php' );
-include_once( 'LogException.php' );
+include_once( 'LogException.php' );     //  EXCEPTION RAISED FOR LOG FUNCTIONALITIES
+include_once( 'sql_connector.php' );    //  DATABASE MANAGEMENT
+include_once( 'security.php' );         //  SECURITY FUNCTIONALITIES[SANITIZATION/RANDOMIZATION]
 
-function add_cart( $songId ): int{
 
+//  CART MANAGEMENT
+
+
+/**  If the song is not present it will add it into the session cart
+ * @param  int $songId id of the song to be added to the cart
+ * @return int The new number of songs listed into the cart
+ */
+function add_cart( int $songId ): int{
 
     if( !isset( $_SESSION[ 'cart' ]))
         $_SESSION[ 'cart' ] = [];
@@ -15,10 +22,15 @@ function add_cart( $songId ): int{
     if( !in_array( $songId, $_SESSION[ 'cart' ] ))
         $_SESSION['cart'][] = $songId;
 
-    return sizeof( $_SESSION[ 'cart' ] );
+    return count( $_SESSION[ 'cart' ] );
+
 }
 
-function remove_cart( $songId ): int{
+/**  If the song is present it will remove it from the session cart
+ * @param  int $songId id of the song to be added to the cart
+ * @return int The new number of songs listed into the cart
+ */
+function remove_cart( int $songId ): int{
 
     if( !isset( $_SESSION[ 'cart' ]))
         $_SESSION[ 'cart' ] = [];
@@ -27,10 +39,10 @@ function remove_cart( $songId ): int{
         $_SESSION[ 'cart' ] = array_diff( $_SESSION[ 'cart' ], [$songId] );
 
     return count( $_SESSION[ 'cart' ] );
+
 }
 
-/**
- * Returns a cart representation for the user payment form
+/**  Returns the songs contained into the cart adding information obtained from the database
  * @throws LogException If the given songID isn't present
  */
 function get_cart(): array{
@@ -38,10 +50,11 @@ function get_cart(): array{
     if( !isset( $_SESSION[ 'cart' ]))
         $_SESSION[ 'cart' ] = [];
 
+    $connection = new sqlconnector();  //  connection with database
     $data = [];
-    $connection = new sqlconnector();
+
     foreach( $_SESSION[ 'cart' ] as $song )
-        $data[] = $connection->getSongInfo($song);
+        $data[] = $connection->getSongInfo( $song );
 
     return $data;
 
@@ -49,163 +62,196 @@ function get_cart(): array{
 
 try {
 
-    if( isset( $_POST[ 'type' ])) {  //  every message must have a 'type' field
+    if( !isset( $_POST[ 'type' ])) //  every message must have the 'type' field
+        throw new LogException(
+            [ 'SERVICE-ANALYSIS' ],
+            'SERVICE-LOGIC',
+            8,
+            'Bad General Request missing basic field "type"[Out of client Request]'
+        );
 
-        if( strcmp( $_POST[ 'type' ], 'logout' ) == 0 ){
+    //  the system will not automatically remove the authentication credentials after an authentication error
+    //  otherwise a brute force of session id can be used to randomly logout users
+    check_authentication();
+
+    switch( $_POST[ 'type' ]) {
+
+        case 'logout':
             session_destroy();
             unset( $_COOKIE[ 'auth' ]);   //  manual clean of cookie
-            setcookie( 'auth', '', time() - 3600, '/'); // empty value and old timestamp -> browser drops cookie from memory
-            header("index.php", true, 301 );
+            setcookie( 'auth', '', time() - 3600, '/' ); // empty value and old timestamp -> browser drops cookie from memory
+
+            header( "index.php", true, 301 );  //  redirection to the login page
             exit();
-        }
 
-        check_authentication();
-        switch( $_POST[ 'type' ]) {
+        case 'default_search':    //  search inside user's bought songs
 
-            case 'default_search':
+            //  parameter check[ existence + sanitization ]
+            if( isset( $_POST[ 'page' ]) && is_numeric( $_POST[ 'page' ]) && $_POST[ 'page' ] > -1 ){
 
-                if( isset( $_POST[ 'page' ]) && is_numeric( $_POST[ 'page' ])) {
+                $connector = new sqlconnector(); //  connection with the database
+                echo json_encode( $connector->getMusic( 'default_search', $_SESSION[ 'user-id' ], '', '', $_POST[ 'page' ]));
 
-                    $connector = new sqlconnector();
-                    echo json_encode( $connector->getMusic( 'default_search', $_SESSION[ 'user-id' ], '', '', $_POST[ 'page' ]));
+            }else
+                throw new LogException(
+                    [ 'SERVICE-ANALYSIS' ],
+                    'SERVICE-LOGIC',
+                    1,
+                    'Bad [DEFAULT_SEARCH] Request, missing or invalid request field [Out of client Request]'
+                );
+            break;
 
-                }else
-                    throw new LogException(
-                        [ 'SERVICE-ANALYSIS' ],
-                        'SERVICE-LOGIC',
-                        7,
-                        'Bad Default Search Request, missing or invalid request fields[Out of client Request]'
-                    );
-                break;
+        case 'search':    //  search inside music archive
 
-            case 'search':
+            //  parameters existence check
+            if( isset( $_POST[ 'genre' ], $_POST[ 'filter' ], $_POST[ 'page' ])) {
 
-                if( isset( $_POST[ 'genre' ], $_POST[ 'filter' ], $_POST[ 'page' ])) {
+                $connector = new sqlconnector();  //  connection with the database
 
-                    check_search( $_POST[ 'genre' ], $_POST[ 'filter' ], $_POST[ 'page' ]);
+                //  user-id checked into check_authentication()[ line 87 ]
+                echo json_encode( $connector->getMusic( 'search', $_SESSION[ 'user-id' ], $_POST[ 'filter' ], $_POST[ 'genre' ], $_POST[ 'page' ]));
 
-                    $connector = new sqlconnector();
-                    echo json_encode( $connector->getMusic( 'search', $_SESSION[ 'user-id' ], $_POST[ 'filter' ], $_POST[ 'genre' ], $_POST[ 'page' ]));
+            }else
+                throw new LogException(
+                    [ 'SERVICE-ANALYSIS' ],
+                    'SERVICE-LOGIC',
+                    1,
+                    'Bad [SEARCH] Request, missing request fields [Out of client Request]'
+                );
+            break;
 
-                }else
-                    throw new LogException(
-                        [ 'SERVICE-ANALYSIS' ],
-                        'SERVICE-LOGIC',
-                        7,
-                        'Bad Default Search Request, missing request fields[Out of client Request]'
-                    );
-                break;
+        case 'add_cart':    //  add a song to the cart
 
-            case 'add_cart':
+            //  parameter check[ existence + sanitization ]
+            if( isset( $_POST[ 'song-id' ]) && is_numeric( $_POST[ 'song-id' ]) && $_POST[ 'song-id' ] > -1 )
+                echo add_cart( $_POST[ 'song-id' ]);  //  returns the number of songs inside the cart
+            else
+                throw new LogException(
+                    [ 'SERVICE-ANALYSIS' ],
+                    'SERVICE-LOGIC',
+                    1,
+                    'Bad [ADD_CART] Request. Missing or invalid song-ID [Out of client Request]'
+                );
+            break;
 
-                if( isset( $_POST[ 'song-id' ]) && is_numeric( $_POST[ 'song-id' ])) {
-                    echo add_cart( $_POST[ 'song-id' ]);
-                }else
-                    throw new LogException(
-                        [ 'SERVICE-ANALYSIS' ],
-                        'SERVICE-LOGIC',
-                        7,
-                        'Bad Add Cart Request. Missing or invalid song-ID[Out of client Request]'
-                    );
-                break;
+        case 'remove_cart':
 
-            case 'remove_cart':
-                if( isset( $_POST[ 'song-id' ]) && is_numeric( $_POST[ 'song-id' ]))
-                    echo remove_cart( $_POST[ 'song-id' ]);
+            //  parameter check[ existence + sanitization ]
+            if( isset( $_POST[ 'song-id' ]) && is_numeric( $_POST[ 'song-id' ]) && $_POST[ 'song-id' ] > -1 )
+                echo remove_cart( $_POST[ 'song-id' ]);  //  returns the number of songs inside the cart
+            else
+                throw new LogException(
+                    [ 'SERVICE-ANALYSIS' ],
+                    'SERVICE-LOGIC',
+                    1,
+                    'Bad [REMOVE_CART] Request. Missing or invalid song-ID [Out of client Request]'
+                );
+            break;
 
-                else
-                    throw new LogException(
-                        [ 'SERVICE-ANALYSIS' ],
-                        'SERVICE-LOGIC',
-                        7,
-                        'Bad Remove Cart Request. Missing or invalid song-ID[Out of client Request]'
-                    );
-                break;
+        case 'get_cart':
 
-            case 'get_cart':
-                echo json_encode(get_cart());
-                break;
+            echo json_encode( get_cart() );
+            break;
 
-            case 'order':
+        case 'order':
 
-                if( !isset( $_POST[ 'CCN' ], $_POST[ 'CVV' ], $_POST[ 'name' ], $_POST[ 'surname' ], $_POST[ 'card-expire' ] ))
-                    throw new LogException(
-                        [ 'SERVICE-ANALYSIS' ],
-                        'SERVICE-LOGIC',
-                        7,
-                        'Bad Buy Request. Missing credit card data[Out of client Request]'
-                    );
+            if( !isset( $_POST[ 'CCN' ], $_POST[ 'CVV' ], $_POST[ 'name' ], $_POST[ 'surname' ], $_POST[ 'card-expire' ] ))
+                throw new LogException(
+                    [ 'SERVICE-ANALYSIS' ],
+                    'SERVICE-LOGIC',
+                    1,
+                    'Bad [ORDER] Request. Missing some credit card data [Out of client Request]'
+                );
 
-                $cart = get_cart();
+            check_credit_card( $_POST[ 'CCN' ], $_POST[ 'CVV' ], $_POST[ 'name' ], $_POST[ 'surname' ], $_POST[ 'card-expire' ] );
 
-                if( count( $cart ) != 0 ){
+            $cart = get_cart();
 
-                    $connection = new sqlconnector();
-                    do {
-                        $transaction_id = randBytes();
-                    }while( $connection->checkTransaction( $transaction_id ));
+            if( count( $cart ) != 0 ){
 
-                    $_SESSION[ 'order' ] = [
-                        "cart" => $cart,
-                        "transactionId" => $transaction_id,
-                        "CCN" => $_POST[ 'CCN' ],
-                        "CVV" => $_POST[ 'CVV' ],
-                        "name" => $_POST[ 'name' ],
-                        "surname" => $_POST[ 'surname' ],
-                        "card-expire" => $_POST[ 'card-expire' ],
-                        "transaction-expire" => time() + 120
-                    ];
+                $connection = new sqlconnector();
 
-                    $price = 0;
-                    $songs = [];
+                //  generation of unique transactionID
+                do {
 
-                    foreach( $cart as $song ) {
-                        $price += $song['price'];
-                        $songs[] = $song[ 'title' ];
-                    }
+                    $transaction_id = randBytes();
 
-                    echo json_encode( [
-                        "transactionID" => $transaction_id,
-                        "price" => $price,
-                        "cart" => $songs
-                    ]);
+                }while( $connection->checkTransaction( $transaction_id )); //  check id not already used
 
+                //  caching of credit card information
+                $_SESSION[ 'order' ] = [
+                    "cart" => $cart,                     //  actual cart
+                    "transactionId" => $transaction_id,  //  transactionID associated with the order
+                    "CCN" => $_POST[ 'CCN' ],            //  credit card information for the payment
+                    "CVV" => $_POST[ 'CVV' ],
+                    "name" => $_POST[ 'name' ],
+                    "surname" => $_POST[ 'surname' ],
+                    "card-expire" => $_POST[ 'card-expire' ],
+                    "transaction-expire" => time() + 120  //  expire of the order[2m]
+                ];
+
+                //  extraction of titles and total price for user confirm advertisement
+                $price = 0;
+                $songs = [];
+                foreach( $cart as $song ) {
+                    $price += $song['price'];
+                    $songs[] = $song[ 'title' ];
                 }
-                break;
+
+                echo json_encode([
+                    "transactionID" => $transaction_id,
+                    "price" => $price,
+                    "cart" => $songs
+                ]);
+
+            }else
+                throw new LogException(
+                    [ 'SERVICE-ANALYSIS' ],
+                    'SERVICE-LOGIC',
+                    1,
+                    'Bad [ORDER] Request. No elements into the cart [Out of client Request]'
+                );
+            break;
                 
             case 'buy':
                 if( !isset( $_POST[ 'transactionID' ], $_SESSION[ 'order' ]))
                     throw new LogException(
                         [ 'SERVICE-ANALYSIS' ],
                         'SERVICE-LOGIC',
-                        7,
-                        'Bad Buy Request. Missing transactionID[Out of client Request]'
+                        1,
+                        'Bad [BUY]. Missing request field[Out of client Request]'
                     );
 
-
+                //  verification order is not too old
                 if( $_SESSION[ 'order' ][ 'transaction-expire' ] > time() ){
-                    echo "checked";
+
                     $cart = $_SESSION[ 'order' ][ 'cart' ];
-                    if( count( $cart ) != 0 ){
-                        $connection = new sqlconnector();
-                        foreach( $cart as $song ){
+
+                    $connection = new sqlconnector();
+                    //  user-id checked into check_authentication()[ line 87 ]
+                    foreach( $cart as $song ){
                             $connection->addPayment(
                                 $_POST[ 'transactionID' ],
                                 $_SESSION[ 'user-id' ],
-                                $song['song-id'],
+                                $song[ 'song-id' ],
                                 $song[ 'price' ],
                                 $_SESSION[ 'order' ][ 'CCN' ],
                                 $_SESSION[ 'order' ][ 'name' ],
                                 $_SESSION[ 'order' ][ 'surname' ]
                             );
                             remove_cart( $song[ 'song-id' ] );
-                        }
                     }
-                }
-                echo "checked2";
+                }else
+                    throw new LogException(
+                        [ 'SERVICE-ANALYSIS' ],
+                        'SERVICE-LOGIC',
+                        1,
+                        'Bad [BUY] Request. Order expired by ' . (time() - $_SESSION[ 'order' ][ 'transaction-expire' ]) . '. Transaction aborted'
+                    );
                 break;
 
             case 'download':
+
                 if( !isset( $_POST[ 'song-id' ]))
                     throw new LogException(
                         [ 'SERVICE-ANALYSIS' ],
@@ -213,51 +259,52 @@ try {
                         9,
                         'Bad Buy Request. Missing songID[Out of client Request]'
                     );
+
                 $connection = new sqlconnector();
+                //  user-id checked into check_authentication()[ line 87 ]
                 $songTitle = $connection->checkSong( $_SESSION[ 'user-id' ], $_POST[ 'song-id' ]);
                 $filename = exposeData( 'song', $songTitle );
 
-                if(file_exists($filename)){
+                if( file_exists( $filename )){
 
                     //Get file type and set it as Content Type
-                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                    header('Content-Type: ' . finfo_file($finfo, $filename));
-                    finfo_close($finfo);
+                    $finfo = finfo_open( FILEINFO_MIME_TYPE );
+                    header('Content-Type: ' . finfo_file( $finfo, $filename ));
+                    finfo_close( $finfo );
 
                     //Use Content-Disposition: attachment to specify the filename
-                    header('Content-Disposition: attachment; filename='.basename($filename));
+                    header( 'Content-Disposition: attachment; filename=' . basename( $filename ));
 
                     //No cache
-                    header('Expires: 0');
-                    header('Cache-Control: must-revalidate');
-                    header('Pragma: public');
+                    header( 'Expires: 0' );
+                    header( 'Cache-Control: must-revalidate' );
+                    header( 'Pragma: public' );
 
                     //Define file size
-                    header('Content-Length: ' . filesize($filename));
+                    header( 'Content-Length: ' . filesize( $filename ));
 
                     ob_clean();
                     flush();
-                    readfile($filename);
+                    readfile( $filename );
 
-                }
+                }else
+                    throw new LogException(
+                        [ 'INTERNAL ERROR' ],
+                        'SERVICE-LOGIC',
+                        0,
+                        'Bad [DOWNLOAD] Request. Specified song ' . $filename. ' not present'
+                    );
                 break;
 
             default:
                 throw new LogException(
                     [ 'SERVICE-ANALYSIS' ],
                     'SERVICE-LOGIC',
-                    8,
-                    'Bad General Request invalid field "type"[Out of client Request]'
+                    1,
+                    'Bad Request invalid field "type"[Out of client Request]'
                 );
         }
 
-    }else
-        throw new LogException(
-            [ 'SERVICE-ANALYSIS' ],
-            'SERVICE-LOGIC',
-            8,
-            'Bad General Request missing basic field "type"[Out of client Request]'
-        );
 
 }catch( LogException $e ){
 

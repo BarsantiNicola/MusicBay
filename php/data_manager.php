@@ -2,6 +2,8 @@
 
 include_once( 'LogException.php' );
 
+
+//  THE FILE CONTAINS METHOD FOR ACCESSING SYSTEM DATA
 /**
  * Function for taking the configuration file needed by the webserver
  * @return mixed A dictionary containing the configuration file

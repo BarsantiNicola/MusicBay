@@ -21,9 +21,7 @@ document.addEventListener( 'DOMContentLoaded', function(){
 	cleanPasswordForm();
 	cleanOTPforms();
 	PasswordEvaluationLoad();
-	CaptchaLoad();
 	OTPLoad();
-	cleanCaptchaForms();
 
 },  false );
 
@@ -55,7 +53,6 @@ rightLinkOut.addEventListener( 'click', (event) => {
 
 		sleep(600).then(() => {         //  give some time to conclude the previous animation(changing primary page)
 			container.classList.add( 'right-panel-active' );
-			cleanCaptchaForms();            //  clean eventual pendent information on captcha
 		});
 		
 	}else
@@ -87,7 +84,6 @@ leftLinkOut.addEventListener( 'click', (event) => {
 
 		sleep(600).then(() => {            //  give some time to conclude the previous animation(changing primary page)
     		container.classList.remove( 'right-panel-active' ); //  clean eventual pendent information on registration form
-			cleanCaptchaForms();               //  clean eventual pendent information on captcha
 		});
 		
 	}else
@@ -116,7 +112,7 @@ signInLinkOut.addEventListener( 'click', (event) => {
 
 	event.preventDefault();
 	let credentials = checkLoginForm(); //  returns [username, password_hash, 'login'] in case all information valid
-
+	alert( JSON.stringify( credentials ));
 	if( credentials == null )
 		return;
 
@@ -163,12 +159,9 @@ passwordRequestButton.addEventListener( 'click', (event) => {
 	if( credentials == null )
 		return;
 
-	showCaptchaLoad( true );	          //  preparing captcha loading
-	showCaptcha('left', credentials );    //  show the captcha and set the information for the next stage
+	showOtp( 'left', credentials );
 	showSecondaryPanel( 'left' );         //  scroll the page to make the captcha visible
 	cleanPasswordForm();                  //  clean the password form's inputs
-	sleep(250).then( () => unlockCaptchaLoad( true ));    //  showing captcha loading(prevents strange behaviour of flex translation)
-	loadCaptchaInformation( 'left' );
 
 });
 
@@ -186,90 +179,6 @@ passwordBackButton.addEventListener( 'click', (event) => {
 	cleanPasswordForm();       //  clean the password form's inputs
 
 });
-
-
-//   CAPTCHA FORMs CONTROL FLOW
-
-const captchaChecks= document.querySelectorAll( '.captcha-check' );   //  check buttons of both the captcha forms
-
-////   Click on Check Button on the Captcha Form
-//
-//   Launch Domain: Left Captcha Form, Right Captcha Form
-//   Actions:
-//             - set previous info into otp form
-//             - set captcha code into otp form
-//             - clean stored information
-//             - move to otp form
-//             - clean captcha form
-captchaChecks.forEach( captcha => captcha.addEventListener( 'click', function( event ){
-
-	event.preventDefault();
-	let data = {};
-	data[ 'captcha-value' ] = generateCaptchaValue();   //  extraction of captcha code	
-
-	if( this.parentNode.classList.contains( 'left' )){  //  captcha on left page
-
-		//  information extraction from hidden inputes
-		const inputs = document.getElementById( 'captcha-left-container' ).querySelectorAll( '.hidden-input' );
-		for( let i = 0; i<inputs.length; i++ )
-			switch( inputs[i].name ){
-
-				case 'username': 
-					data[ 'username' ] = inputs[i].value;
-					break;
-
-				case 'password':
-					data[ 'password' ] = inputs[i].value;
-					break;
-
-				case 'type':
-					data[ 'type' ] = inputs[i].value;
-					break;
-
-				case 'captcha-id':
-					data[ 'captcha-id' ] = inputs[i].value;
-					break;	
-
-				default: break;			
-			}
-			showOtp( 'left', data );  //  loading extracted information into otp form and page change
-
-	}else{	  //  captcha on right page
-  
-		//  information extraction from hidden inputes
-		const inputs = document.getElementById( 'captcha-right-container' ).querySelectorAll( '.hidden-input' );
-		for( let i = 0; i<inputs.length; i++ )
-			switch( inputs[i].name ){
-
-				case 'username': 
-					data[ 'username' ] = inputs[i].value;
-					break;
-
-				case 'password':
-					data[ 'password' ] = inputs[i].value;
-					break;
-
-				case 'phone':
-					data[ 'phone' ] = inputs[i].value;
-					break;
-
-				case 'captcha-id':
-					data[ 'captcha-id' ] = inputs[i].value;
-					break;	
-
-				case 'type':
-						data[ 'type' ] = inputs[i].value;
-						break;	
-
-				default: break;			
-			}
-			showOtp( 'right', data );  //  loading extracted information into otp form and page change
-			
-	}
-	cleanCaptchaForms();
-	
-}));
-
 
 //   OTP FORMs CONTROL FLOW
 
@@ -361,12 +270,10 @@ signUpRequest.addEventListener('click', (event) => {
 
 	let data = checkRegistrationForm();   //  extraction and checking of the registration form inputs
 
-	showCaptchaLoad( true );        //  preparing captcha loading
-	showCaptcha( 'right', data );   //  displaying the captcha on the secondary page
+	showOtp( 'right', data );
 	showSecondaryPanel( 'right' );  //  moving to the secondary page
 	cleanRegistrationForm();        //  cleaning the registration form inputs
-	sleep(520).then( () => unlockCaptchaLoad( true ));   //  showing captcha loading(prevents strange behaviour of flex translation)
-	loadCaptchaInformation( 'right' );
+
 });
 
 
