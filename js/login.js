@@ -280,13 +280,13 @@ signUpRequest.addEventListener('click', (event) => {
 ////  General function to load OTP input management on all the page's inputs
 function OTPLoad(){
 
-	launchSingleOTP( document.querySelectorAll( '#otp-left > *[id]' ));  //  login/password_change OTP input
-	launchSingleOTP( document.querySelectorAll( '#otp-right > *[id]' )); //  registration OTP input
+	launchSingleOTP( document.querySelectorAll( '#otp-left > *[id]' ), document.getElementById( 'otp-left-form' ).getElementsByClassName( 'check-otp-button' )[0] );  //  login/password_change OTP input
+	launchSingleOTP( document.querySelectorAll( '#otp-right > *[id]' ), document.getElementById( 'otp-right-form' ).getElementsByClassName( 'check-otp-button' )[0] ); //  registration OTP input
 
 }
 
 //  Function to load OTP management on form's inputs
-function launchSingleOTP( inputs ){
+function launchSingleOTP( inputs, button ){
 
 	for( let i = 0; i < inputs.length; i++ ){
 
@@ -294,7 +294,7 @@ function launchSingleOTP( inputs ){
 
 		//  each input of the otp is managed by a different eventListener
     	inputs[i].addEventListener( 'keydown', function( event ){
-	
+			alert( button );
 			//  DEL button for moving left on the OTP removing data
       		if( event.key === 'Backspace' ) {
 
@@ -314,6 +314,9 @@ function launchSingleOTP( inputs ){
 					inputs[i].value = event.key;
         			if( i !== inputs.length -1 )
         				inputs[ i + 1 ].focus();
+					else
+						button.focus();
+
       				event.preventDefault();  //  prevents doubling of the value on the next element on focus
        			
 				}else 

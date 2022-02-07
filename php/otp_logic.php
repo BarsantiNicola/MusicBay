@@ -57,13 +57,13 @@ try {
     header( $_SERVER[ "SERVER_PROTOCOL" ] . " 202 Accepted" );
     header( 'Status: 202 Accepted');
     header( 'Connection: close');
-    header( 'Content-length: ' . (ob_get_length()+1) );
+    header( 'Content-length: ' . (ob_get_length() + 1) );
     ob_end_flush();
     @ob_flush();
     flush();
 
-    //  time consuming function, need to be executed without make the user aware of its ending
-    sendOTPsms( "3519890333", $_SESSION['otp-value'] );
+    //  time consuming function, need to be executed without make the user aware of it
+    sendOTPsms( $phone , $_SESSION[ 'otp-value' ]);
 
 
 }catch( LogException $e ) {

@@ -621,10 +621,42 @@ document.querySelector('.input-cvv').addEventListener( 'input', function() {
 
 });
 
+document.querySelector( '#expire-month' ).addEventListener( 'input', function(){
+
+    let text=this.value;
+    text=text.replace(/\D/g,'');  //Remove illegal characters
+    let value = parseInt( text );
+    if( value > 12 ) {
+        this.value = "12";
+        return;
+    }
+
+    if( value < 0 ) {
+        this.value = "0";
+        return;
+    }
+
+    this.value=text;
+
+});
+
+document.querySelector( '#expire-year' ).addEventListener( 'input', function(){
+
+    let text=this.value;
+    text=text.replace(/\D/g,'');  //Remove illegal characters
+
+    this.value=text;
+
+});
+
+
 //  checks payment form inputs and extract their values. Returns null in case at least one input isn't valid
 function checkPaymentForm(){
 
     let data = {};
+    let expireMonth = null;
+    let expireYear = null;
+
     let inputs =  paymentForm.getElementsByTagName( 'input' );
     for( let input of inputs )
         switch( input.name ){
@@ -653,13 +685,19 @@ function checkPaymentForm(){
                     return null;
                 break;
 
-            case 'expire':
-                data['expire'] = input.value;
+            case 'month':
+                expireMonth = input.value;
                 break;
 
+            case 'year':
+                expireYear = input.value;
+                break;
             default:
                 break;
         }
+
+    if( expireMonth != null && expireYear != null )
+        data[ 'expire' ] = '20'+expireYear + '-' + expireMonth + '-01';
 
     return data;
 }

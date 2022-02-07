@@ -2,8 +2,9 @@
 <html>
 	<head>
         <?php
-            //if( !isset( $_SESSION[ 'user-id' ]))
-                //header('Location: ' . 'index.php', true, 301 );
+            session_start();
+            if( !isset( $_SESSION[ 'user-id' ]))
+                header('Location: ' . 'index.php', true, 301 );
         ?>
         <meta name="author" content="Barsanti Nicola">
     	<meta charset="UTF-8">
@@ -43,10 +44,12 @@
                                 <input class="input-surname" name="surname" type="text" placeholder="Surname">
                             </div>
                         </label>
-                        <label class="label-expire">Card Expire
-                            <div class="inputs-field">
-                                <input class="input-expire" name="expire" type="date" class="center" date-date-format="YY/MM/DD">
-                            </div>
+                        <label class="label-expire center">Card Expire
+                            <span class="expiration">
+                                <input id="expire-month" class="expire-month" type="text" name="month" placeholder="MM" maxlength="2" size="2" />
+                                <span>/</span>
+                                <input id="expire-year" type="text" name="year" placeholder="YY" maxlength="2" size="2" />
+                            </span>
                         </label>
                         <input id="hidden-pay-songID" class="hidden-input" type="hidden" name="songID">
                     </form>
@@ -97,11 +100,11 @@
                 </form>
                 <div class="logout">
                     <?php
-                        if( !isset( $_SESSION[ 'cart' ]) || sizeof( $_SESSION[ 'cart' ]) == 0 ){
+                        if( !isset( $_SESSION[ 'cart' ]) || count( $_SESSION[ 'cart' ]) == 0 ){
                             echo '<text id="cart-show" class="disabled"></text>';
                             echo '<a><i  id="shopping-cart" class="fa fa-shopping-cart"></i></a>';
                         }else{
-                            echo '<text id="cart-show">'.sizeof( $_SESSION[ 'cart' ]) . '</text>';
+                            echo '<text id="cart-show">'. count( $_SESSION[ 'cart' ]) . '</text>';
                             echo '<a><i id="shopping-cart" class="fa fa-shopping-cart active"></i></a>';
                         }
                     ?>

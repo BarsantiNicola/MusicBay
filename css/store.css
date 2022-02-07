@@ -463,6 +463,19 @@ audio{
     margin-bottom: 20px;
 }
 
+.expiration {
+    border: 1px solid #bbbbbb;
+    margin-left: 45px;
+    border-radius: 3px;
+}
+.expiration input {
+    border: 0;
+}
+
+.payment-form input.expire-month{
+    padding-left: 10px;
+}
+
 .responsive-table{
     padding-left:0;
 }
