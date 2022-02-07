@@ -2,5 +2,9 @@
     "db": "musicbay",
     "user": "root",
     "password": "root",
-    "music_path" : "/var/www/html/musicbay/music/"
+    "music_path" : "/home/nico/Scrivania/protected_site/music/",
+    "log_path" : "/home/nico/Scrivania/protected_site/log/site_log"
+    "twilloID" : "ACbb299f14efaaf59ae9a92ef1b4b36b3f",
+    "twilloToken": "9bc26dd131f268824bc0b2d833f572c0",
+    "twilloNumber": "+18594848574"
 }
