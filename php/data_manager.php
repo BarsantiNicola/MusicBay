@@ -1,7 +1,7 @@
 <?php
 
 include_once( 'LogException.php' );
-
+require_once 'vendor/autoload.php';
 
 //  THE FILE CONTAINS METHOD FOR ACCESSING SYSTEM DATA
 /**
@@ -33,49 +33,20 @@ function writeLog( LogException $logException ){
 /**
  * Places the given data into a temp folder with a random name of 64 bytes. Permits sharing internal files to users
  * preventing attacker to steal the data. Stored data will be automatically removed after the lease time[by a system cron application]
- * @param string $type  The type of the file to be exposed. Can be 'song' or 'captcha'
- * @param string $name  The name of the file to be exposed
- * @throws LogException In case the given file doesn't exist
- * @return string  The exposed path containing the file
+ * @param  string $name   The name of the file to be exposed
+ * @throws LogException   In case the given file doesn't exist
+ * @return string         The exposed path containing the file
  */
-function exposeData( string $type, string $name ): string{
+function get_file( string $name ): string{
 
     $configuration = getConfiguration( 'conf' );
 
     //  to improve security the database contains only the file name without any reference of the absolute position
-    switch( $type ){  //  generation of relative path to the data
+    $realPath  = realPath( $configuration->music_path . $name );
 
-        case 'captcha':
-            $realPath = $configuration->captcha_path . $name;
-            $givenPath = 'temp/';
-            break;
-
-        case 'song':
-            $realPath = $configuration->music_path . $name;
-            $givenPath = 'download/';
-            break;
-
-        default:
-
-            throw new LogException(
-                [ 'INTERNAL-ERROR' ],
-                'DATA-MANAGER',
-                0,
-                'Unable to identify the request type -> ' . $type
-            );
-    }
-
-    if( file_exists( $realPath )){
-
-        $ext = substr( $name, strrpos( $name, "." ));  //  getting the extension to be applied on the exposed file
-        $randName = randBytes( 64 );                   //  generation of random filename of 64 bytes
-
-        $exposedPath = '../' . $givenPath . $randName . $ext;
-
-        //  file will be dropped automatically after 1m by the temp_dropper.php cron executable
+    if( $realPath != null && file_exists( $realPath ) && strstr( $realPath, $configuration->music_path ) == $realPath )
         return $realPath;
-
-    }else
+    else
         throw new LogException(
             [ 'INTERNAL-ERROR' ],
             'DATA-MANAGER',
@@ -84,56 +55,38 @@ function exposeData( string $type, string $name ): string{
         );
 }
 
-/**
- * Function for the generation of a set of captcha images(16) starting from a set name
- * The function will identify all the involved file and expose them with random names
- * @param string $name  Identifier of a captcha(set of 16 images)
- * @throws LogException
- * @return array An array of 16 dictionaries containing the placing and the position of the exposed file
- */
-function exposeCaptcha( string $name ): array{
-
-    $captchas = [];
-    for( $x = 0; $x < 4; $x++ )
-        for( $y = 0; $y < 4; $y++ ){
-            $pos = $x . '' . $y;
-            $captchas[ $pos ] = exposeData( 'captcha', $name . $pos . ".jpg" );
-        }
-
-    return $captchas;
-}
+use Twilio\Rest\Client;
 
 /**
- * Generation of a captcha key starting from a string and a mask
- * [captcha = abcde mask = 01011] => -b-de => bde
- * @param string $captcha Random string of 16 bytes
- * @param string $mask    Mask of 16 0/1 to be applied on the captcha to generate the final auth key
- * @throws LogException   If the given parameters are not valid to generate a key
- * @return string  The authentication key derived from the captcha and the mask
+ * Function to send a predefined sms containing the otpValue to the given number
+ * @param string $phone    Random string of 16 bytes
+ * @param string $otpValue The otp value composed by 6 digits
+ * @throws LogException    In case the system is unable to send to sms
  */
-function generateAuthCaptcha( string $captcha, string $mask ): string{
+function sendOTPsms( string $phone, string $otpValue ){
 
-    if( strlen( $captcha ) != strlen( $mask ) || strlen( $mask ) != 16 )
+    try {
+
+        $configuration = getConfiguration('conf');
+
+        $sid = $configuration->twilloID;
+        $token = $configuration->twilloToken;
+        $twilio = new Client($sid, $token);
+
+        $twilio->messages->create(
+            '+39' . $phone,
+                [
+                    "body" => "Your MusicBay verification code is: " . $otpValue,
+                    "from" => $configuration->twilloNumber
+                ]
+            );
+
+    }catch( Exception $e ){
         throw new LogException(
             [ 'INTERNAL-ERROR' ],
             'DATA-MANAGER',
             0,
-            'Captcha and Mask len doesn\'t match[' . strlen($captcha) . '!=' .strlen( $mask )
+            'Unable to send token to phone number -> ' . $phone
         );
-
-    $authCaptcha = '';
-
-    for( $a = 0; $a<strlen($mask); $a++ )
-        if( $mask[$a] == '1' )
-            $authCaptcha .= $captcha[$a];
-
-    return $authCaptcha;
-
+    }
 }
-
-/**
- * Function to send a predefined sms containing the otpValue to the given number
- * @param string $phone Random string of 16 bytes
- * @param string $otpValue The otp value composed by 6 digits
- */
-function sendOTPsms( string $phone, string $otpValue ){}

@@ -67,7 +67,6 @@ class sqlconnector{
 
         }catch( Exception $e ){
 
-            $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
@@ -123,11 +122,10 @@ class sqlconnector{
 
         }catch( LogException $e ){
 
-            $stmt->close();
             throw $e;
 
         }catch( Exception $e ){
-            $stmt->close();
+
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
@@ -157,7 +155,6 @@ class sqlconnector{
 
         }catch( Exception $e ){
 
-            $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
@@ -190,7 +187,6 @@ class sqlconnector{
 
         }catch( Exception $e ){
 
-            $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
@@ -240,12 +236,10 @@ class sqlconnector{
 
         }catch( LogException $e ){
 
-            $stmt->close();
             throw $e;
 
         }catch( Exception $e ){
 
-            $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
@@ -365,12 +359,10 @@ class sqlconnector{
 
         }catch( LogException $e ){
 
-            $stmt->close();
             throw $e;
 
         }catch( Exception $e ){
 
-            $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
@@ -399,7 +391,6 @@ class sqlconnector{
 
             }
 
-            $stmt->close();
             if( $result > 0 )
                 return true;
             else
@@ -407,7 +398,6 @@ class sqlconnector{
 
         }catch( Exception $e ){
 
-            $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
@@ -461,12 +451,10 @@ class sqlconnector{
 
         }catch( LogException $e ){
 
-            $stmt->close();
             throw $e;
 
         }catch( Exception $e ){
 
-            $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
@@ -499,6 +487,7 @@ class sqlconnector{
             }
 
             $stmt->close();
+
             if ( $phone == null || strlen( $phone ) == 0)
                 throw new LogException(
                     [ 'SERVICE-ANALYSIS', 'BRUTE-FORCING', 'USER-ERROR' ],
@@ -506,16 +495,14 @@ class sqlconnector{
                     1,
                     'Invalid phone number request. User ' . $username . ' not present'
                 );
+
             return sanitize_phone( strip_tags( $phone ));
 
         }catch( LogException $e ){
-
-            $stmt->close();
             throw $e;
 
         }catch( Exception $e ){
 
-            $stmt->close();
             throw new LogException(
                 [ 'INTERNAL-ERROR' ],
                 'SQL-CONNECTOR',
