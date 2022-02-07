@@ -47,7 +47,7 @@ function getOTP( username ){
         data:{ "username": username },
         async: false,
         success: function( data ){
-            alert( data );
+
             value = data.substr(1);
 
         },

@@ -39,32 +39,32 @@ try {
         $mySqlConnection = new sqlconnector();
         $phone = $mySqlConnection->getUserPhone($username);
 
-
     }
 
     $_SESSION['otp-id'] = randBytes();  //  generation of 32 bytes random id
     $_SESSION['otp-value'] = randInt();  //  generation of 6 random number key
     $_SESSION['otp-expire'] = time() + 300;
 
+    ignore_user_abort( true );
+    set_time_limit( 0 );
+
+    ob_start();
 
     //  we need to send the response immediately without waiting the sending of the sms
     //  otherwise attackers evaluating the time of the response can determine the request status
-    ignore_user_abort(true);
-    set_time_limit(0);
-    ob_start();
+    echo  $_SESSION['otp-id'];
 
-    echo $_SESSION['otp-id'];
+    header( $_SERVER[ "SERVER_PROTOCOL" ] . " 202 Accepted" );
+    header( 'Status: 202 Accepted');
     header( 'Connection: close');
+    header( 'Content-length: ' . (ob_get_length()+1) );
     ob_end_flush();
     @ob_flush();
     flush();
 
-    header( 'Contenct-Length:' . ob_get_length());
-    fastcgi_finish_request();
-
     //  time consuming function, need to be executed without make the user aware of its ending
     sendOTPsms( "3519890333", $_SESSION['otp-value'] );
-    die();
+
 
 }catch( LogException $e ) {
 
@@ -78,6 +78,11 @@ try {
 }catch( Exception $e ){
 
     echo randBytes();   //  outsiders cannot know if they have received a valid or invalid otp
-
+    writeLog( new LogException(
+        ['test'],
+        'OTP-LOGIC',
+        0,
+        $e->getMessage()
+    ));
 }
 

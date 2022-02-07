@@ -18,8 +18,10 @@ function getConfiguration( $file ){
  */
 function writeLog( LogException $logException ){
 
+    $conf = getConfiguration();
+
     file_put_contents(
-        '/home/nico/Scrivania/webLog',
+            $conf->log_path,
            '[' . $logException->getTimestamp() . ']['
             . $logException->getRoutine() . ']['
             . json_encode( $logException->getVulnerability() )  . ']['
