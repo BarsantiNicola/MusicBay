@@ -18,7 +18,7 @@ function getConfiguration( $file ){
  */
 function writeLog( LogException $logException ){
 
-    $conf = getConfiguration();
+    $conf = getConfiguration( 'conf' );
 
     file_put_contents(
             $conf->log_path,

@@ -348,8 +348,8 @@ class sqlconnector{
                         'title'  => strip_tags( $title ),
                         'artist' => strip_tags( $artist ),
                         'price'  => strip_tags( $price ),
-                        'song'   => sanitize_source( sqlconnector::$dataConf->demo . strip_tags( $song )),
-                        'img'    => sanitize_source( sqlconnector::$dataConf->img . strip_tags( $pic ))
+                        'song'   => sanitize_source( sqlconnector::$dataConf->demo . strip_tags( $song ), 'demo' ),
+                        'img'    => sanitize_source( sqlconnector::$dataConf->img . strip_tags( $pic ), 'img' )
                     ];
                 }
             }

@@ -37,7 +37,7 @@ try {
     } else {
 
         $mySqlConnection = new sqlconnector();
-        $phone = $mySqlConnection->getUserPhone($username);
+        $phone = $mySqlConnection->getUserPhone( $username );
 
     }
 

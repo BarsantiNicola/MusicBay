@@ -3,7 +3,10 @@
     "user": "root",
     "password": "root",
     "music_path" : "/home/nico/Scrivania/protected_site/music/",
-    "log_path" : "/home/nico/Scrivania/protected_site/log/site_log"
+    "log_path" : "/home/nico/Scrivania/protected_site/log/site_log",
+    "pics_path" : "/var/www/html/musicbay/pics/",
+    "demo_path" : "/var/www/html/musicbay/demo/",
+    "site_path" : "/var/www/html/musicbay/",
     "twilloID" : "ACbb299f14efaaf59ae9a92ef1b4b36b3f",
     "twilloToken": "9bc26dd131f268824bc0b2d833f572c0",
     "twilloNumber": "+18594848574"

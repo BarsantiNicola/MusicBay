@@ -484,9 +484,9 @@ function check_search( string $genre, string $filter, string $page ){
  * @param  string $src   source file to be checked
  * @throws LogException  If the given source is invalid or not contained into the data folder
  */
-function sanitize_source( string $src ): string{
+function sanitize_source( string $src, string $type ): string{
 
-    $conf = getConfiguration( 'data' );
+    $conf = getConfiguration( 'conf' );
 
     if( $src == null || strlen( $src ) == 0 )
         throw new LogException(
@@ -496,17 +496,43 @@ function sanitize_source( string $src ): string{
             'Invalid source found into the database: ' . $src
         );
 
-    $src_canonical = realpath( "../" . $src );
+    switch( $type ){
+        case 'img':
+            $src_canonical = realpath( $conf->pics_path . $src );
+            $src = 'pics/' . $src;
+            break;
 
-    if( $src_canonical == false || strpos( $src_canonical, $conf->general ) != 0 )
+        case 'demo':
+            $src_canonical = realpath( $conf->demo_path . $src );
+            $src = 'demo/' . $src;
+            break;
+
+        case 'music':
+            $src_canonical = realpath( $conf->music_path . $src );
+            if( $src_canonical != null && file_exists( $src_canonical ) && strstr( $src_canonical, $conf->music_path ) == $src_canonical )
+                return $src;
+            else
+                throw new LogException(
+                    [ 'XSS-ATTACK' ],
+                    'SECURITY',
+                    3,
+                    'Invalid source found into the database2: ' . $src_canonical . " : " . $src
+                );
+
+        default:
+            $src_canonical = null;
+    }
+
+    if( $src_canonical != null && strstr( $src_canonical, $conf->base_path ) == $src_canonical )
+        return $src;
+    else
         throw new LogException(
             [ 'XSS-ATTACK' ],
             'SECURITY',
-            5,
-            'Invalid source found into the database: ' . $src_canonical
+            3,
+            'Invalid source found into the database2: ' . $src_canonical . " : " . $src
         );
 
-    return $src;
 }
 
 /**
