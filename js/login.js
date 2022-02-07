@@ -37,7 +37,7 @@ const rightLinkOut = document.getElementById( 'right-linkout' );   //  button fo
 
 ////  Moves to the right side of the page when displaying the left side
 //
-//  Launch Domain: Registration Form, Left OTP form, Left Captcha Form
+//  Launch Domain: Registration Form, Left OTP form
 //  Actions: 
 //            - if showing secondary page moves to the primary page
 //            - clean secondary page
@@ -68,7 +68,7 @@ rightLinkOut.addEventListener( 'click', (event) => {
 
 ////  Moves to the left side of the page when displaying the right side
 //
-//  Launch Domain: Login Form, Password Change Form, Right OTP form, Right Captcha Form
+//  Launch Domain: Login Form, Password Change Form, Right OTP form
 //  Actions: 
 //            - if showing secondary page moves to the primary page
 //            - clean secondary page
@@ -112,7 +112,7 @@ signInLinkOut.addEventListener( 'click', (event) => {
 
 	event.preventDefault();
 	let credentials = checkLoginForm(); //  returns [username, password_hash, 'login'] in case all information valid
-	alert( JSON.stringify( credentials ));
+
 	if( credentials == null )
 		return;
 
@@ -148,8 +148,7 @@ const passwordBackButton = document.getElementById( 'password-back' );     //  b
 //   Actions:
 //			   - checks password form information[username,password]
 //			   - execute hash on password
-//             - set captcha form on secondary page
-//			   - move to captcha form
+//			   - move to otp form
 passwordRequestButton.addEventListener( 'click', (event) => {
 
 	event.preventDefault();
@@ -160,7 +159,7 @@ passwordRequestButton.addEventListener( 'click', (event) => {
 		return;
 
 	showOtp( 'left', credentials );
-	showSecondaryPanel( 'left' );         //  scroll the page to make the captcha visible
+	showSecondaryPanel( 'left' );         //  scroll the page to make the otp visible
 	cleanPasswordForm();                  //  clean the password form's inputs
 
 });
@@ -229,13 +228,11 @@ otpCheckButtons.forEach( button => button.addEventListener('click', function(eve
 			break;
 		
 		case 'password-change':
-			if( changePassword( data['username'], data['password'], data['captcha-id'], data['captcha-value'], data['otp-id'], data['otp-value']))
-				alert("Password change path correctly tested!!!");
+			changePassword( data['username'], data['old-password'], data['password'], data['otp-id'], data['otp-value']);
 			break;
 		
 		case 'registration':
-			if( activateUser( data['username'], data['otp-id'], data['otp-value']))
-				alert("Registration path correcly tested!!!");
+			activateUser( data['username'], data['otp-id'], data['otp-value']);
 			break;
 		
 		default: break;	
@@ -260,8 +257,6 @@ const signUpRequest = document.getElementById( 'sign-up-request' );
 //   Launch Domain: SignUp Form
 //   Actions:
 //             - check registration form
-//             - copy information on captcha form
-//             - show captcha form
 //             - show secondary page
 //             - clean registration form
 signUpRequest.addEventListener('click', (event) => {
@@ -270,10 +265,11 @@ signUpRequest.addEventListener('click', (event) => {
 
 	let data = checkRegistrationForm();   //  extraction and checking of the registration form inputs
 
-	showOtp( 'right', data );
-	showSecondaryPanel( 'right' );  //  moving to the secondary page
-	cleanRegistrationForm();        //  cleaning the registration form inputs
-
+	if( data != null ) {
+		showOtp('right', data);
+		showSecondaryPanel('right');  //  moving to the secondary page
+		cleanRegistrationForm();        //  cleaning the registration form inputs
+	}
 });
 
 

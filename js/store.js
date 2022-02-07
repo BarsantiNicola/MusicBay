@@ -476,7 +476,7 @@ function addSong( songID, title, artist, songPrice, song, img ){
         download.textContent = 'Download';
         download.classList.add( 'download-button' );
         download.addEventListener( 'click', function(){
-            downloadSong( songID, title );
+            downloadSong( songID );
         })
         songInfo.appendChild( download );
     }

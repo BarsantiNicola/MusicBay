@@ -1,7 +1,7 @@
 <?php
 
 
-/**  RANDOM DATA GENERATION  **/
+/*  RANDOM DATA GENERATION  */
 
 /**
  * Function for generation of random string composed by numbers of a given length
@@ -65,22 +65,30 @@ function randBytes( int $length = 32 ): string{  //  default length hard-coded i
 
 /**
  * Checks if the user request is valid and in the case update the authentication token
- * @throws LogException  In case of invalid request
+ * @throws LogException  In case of invalid authentication
  */
 function check_authentication(){
 
+    //  checking if all the components involved into authentication are present
     if( !isset( $_SESSION[ 'user-id' ], $_SESSION[ 'user-auth' ], $_COOKIE[ 'auth' ])) {
 
+        //  if not redirection to login page
         header('Location: ' . 'index.php', true, 301 );
         throw new LogException(
-            ['EXPIRED-SESSION', 'USER-ERROR', 'SERVICE-ANALYSIS'],
+            [ 'EXPIRED-SESSION', 'USER-ERROR', 'SERVICE-ANALYSIS' ],
             'SECURITY',
             1,
             'Bad Service Request. Missing session or cookie information[SESSION: ' . isset($_SESSION['user-id']) . " COOKIE:" . isset($_COOKIE['user-auth']) . ']'
         );
     }
 
+    //  verification of authentication credentials
     if( strncmp( $_SESSION[ 'user-auth' ], $_COOKIE[ 'auth' ], 32 ) != 0 ){
+
+        //  if credentials are invalid cleaning of credentials and redirection to login page
+        session_destroy();
+        unset( $_COOKIE[ 'auth' ]);   //  manual clean of cookie
+        setcookie( 'auth', '', time() - 3600, '/' ); // empty value and old timestamp -> browser drops cookie from memory
 
         header('Location: ' . 'index.php', true, 301 );
         throw new LogException(
@@ -89,7 +97,6 @@ function check_authentication(){
             2,
             'Bad Service Request. Missing session or cookie information[PHP_SESSION: ' . $_SESSION['user-id'] . " COOKIE:" . $_COOKIE['user-auth'] . ']'
         );
-
     }
 
     $_SESSION[ 'user-auth' ] = randBytes();
@@ -98,7 +105,7 @@ function check_authentication(){
 }
 
 
-/**  OTP MANAGEMENT  **/
+/*  OTP MANAGEMENT  */
 
 
 /**
@@ -133,47 +140,52 @@ function check_otp( string $otpID, string $otpValue ){
             'Invalid OTP request. OTP already expired'
         );
 
-    if( strcmp( $sessionOTPid , $otpID ) != 0 || strcmp( $sessionOTPvalue, $otpValue ) != 0 )
+    if( strncmp( $sessionOTPid , $otpID, 32 ) != 0 || strncmp( $sessionOTPvalue, $otpValue, 6 ) != 0 )
         throw new LogException(
             [ 'USER-ERROR', 'BRUTE-FORCING' ],
             'SECURITY',
-            2,
+            1,
             'Invalid OTP request. Values doesn\'t match: IDS[' . $sessionOTPid . ':' . $otpValue . '] VALUES[' . $sessionOTPvalue . ':' . $otpValue . ']'
         );
 
 }
 
 
+/*  GENERAL SANITIZATION */
+
+
 /**
- * Checks the given mask is valid
- * Condition on captchaValue:
- *       - must contain only digits
- * @param string $id  id to be checked
- * @throws LogException  If the given source is invalid or not contained into the data folder
+ * Sanitizes given ids(songID, userID)
+ * Condition on ids:
+ *       - must be numeric
+ *       - must not be less than 0
+ * @param  string $id    ID to check
+ * @throws LogException  If the given ID is invalid
  */
 function sanitize_id( string $id ): int{
 
-    if( $id == null || strlen( $id ) == 0 )
+    if( $id == null || !is_numeric( $id ) )
         throw new LogException(
-            [ 'XSS-ATTACK' ],
+            [ 'SERVICE-ANALYSIS', 'XSS-ATTACK' ],
             'SECURITY',
-            10,
-            'Invalid id found into the database: ' . $id
+            2,
+            'Sanitization of id failed. Some invalid characters present -> ' . $id
         );
 
-    if( !preg_match('/^[0-9]/', $id ))
+    if( (int)$id < 0 )
         throw new LogException(
-            [ 'XSS-ATTACK' ],
+            [ 'SERVICE-ANALYSIS' ],
             'SECURITY',
-            9,
-            'Sanitization of id failed. Some invalid characters present -> ' . $id
+            1,
+            'Sanitization of id failed. Ids must be non-negative -> ' . $id
         );
 
     return $id;
 
 }
 
-/**  LOGIN PAGE SANITIZATION  **/
+
+/*  LOGIN PAGE SANITIZATION  */
 
 
 /**
@@ -195,10 +207,11 @@ function sanitize_username( string $username ): string{
             'Sanitization of username failed. Missing field [Out of client Request]'
         );
 
+    //  removing eventual garbage( quotes/spaces )
     $text = trim( str_replace( '"', "" , str_replace( "'", "", utf8_encode( $username ))));
 
     //  checking username length is in [3-20] and it is composed only by letters, digits and @ _ #
-    if( !preg_match( '/^[a-zA-Z0-9_@#]{8,20}$/', $text ))
+    if( !preg_match( '/^[a-zA-Z0-9_@#]{5,20}$/', $text ))
         throw new LogException(
             [ 'SERVICE-ANALYSIS' ],
             'SECURITY',
@@ -221,32 +234,27 @@ function sanitize_username( string $username ): string{
  */
 function sanitize_password( string $password ): string{
 
-    if( $password == null )
+    if( $password == null || strlen( $password ) != 64 )
         throw new LogException(
             [ 'SERVICE-ANALYSIS' ],
             'SECURITY',
             1,
-            'Sanitization of password failed. Missing field [Out of client Request]'
+            'Sanitization of password failed. Missing field [Out of client Request] -> ' . $password
         );
 
-    //  checking username length is in [3-20] and it is composed only by letters, digits and @ _ #
-    if( strlen( $password ) != 64 )
+    //  removing eventual garbage( quotes/spaces )
+    $text = trim( str_replace( '"', "" , str_replace( "'", "", utf8_encode( $password ))));
+
+    //  checking password is composed only by letters and digits[SHA-256 HASH]
+    if( !preg_match( '/^[a-zA-Z0-9]/', $text ))
         throw new LogException(
             [ 'SERVICE-ANALYSIS' ],
             'SECURITY',
             1,
-            'Sanitization of password failed. Invalid password length [Out of client Request] -> [' . $password . ':' . strlen( $password ) . ']'
+            'Sanitization of password failed. Invalid characters [Out of client Request] -> ' . $password
         );
 
-    if( !preg_match( '/^[a-zA-Z0-9]/', $password ))
-        throw new LogException(
-            [ 'SERVICE-ANALYSIS' ],
-            'SECURITY',
-            1,
-            'Sanitization of password failed. Invalid characters [Out of client Request] -> [' . $password . ':' . strlen( $password ) . ']'
-    );
-
-    return $password;
+    return $text;
 
 }
 
@@ -308,7 +316,7 @@ function sanitize_otpId( string $otpID ): string{
             'Sanitization of otpID failed. Missing field [Out of client Request]'
         );
 
-    $text = trim( str_replace( '"', "" , str_replace( "'", "", utf8_encode( $otpID ))));
+    $text = $otpID;
 
     if( $text == null || strlen( $text ) != 32 )
         throw new LogException(
@@ -370,9 +378,6 @@ function sanitize_otpValue( string $otpValue ): string{
 
 }
 
-
-
-
 /**
  * Checks the validity of a registration request by sanitizing all the given inputs. The function automatically cleans
  * the given data from any space/tab
@@ -383,7 +388,7 @@ function sanitize_otpValue( string $otpValue ): string{
  */
 function sanitize_registration( string &$username, string &$password, string &$phone ){
 
-    $username = sanitize_username( $username );
+    $username = strip_tags( sanitize_username( $username ));
     $password = sanitize_password( $password );
     $phone = sanitize_phone( $phone );
 
@@ -407,7 +412,7 @@ function sanitize_activation( string &$username, string &$otpId, string &$otpVal
             'Invalid activation request. Missing stored registration info[might be a tentative of get around site behavior]'
         );
 
-    $username = sanitize_username( $username );
+    $username = strip_tags( sanitize_username( $username ));
     $otpId = sanitize_otpId( $otpId );
     $otpValue = sanitize_otpValue( $otpValue );
 
@@ -417,6 +422,7 @@ function sanitize_activation( string &$username, string &$otpId, string &$otpVal
  * Checks the validity of an account password change request by sanitizing all the given inputs. The function automatically cleans
  * the given data from any space/tab
  * @param  string $username      Username associated with the request
+ * @param  string $old_password  Previous password of the user
  * @param  string $password      New password to be associated to the username
  * @param  string $otpId         ID of the OTP to check[32 bytes]
  * @param  string $otpValue      Value of the OTP to check[6 digits]
@@ -424,8 +430,8 @@ function sanitize_activation( string &$username, string &$otpId, string &$otpVal
  */
 function sanitize_password_change( string &$username, string &$old_password, string &$password, string &$otpId, string &$otpValue ){
 
-    $username = sanitize_username( $username );
-    $old_password = sanitize_password( $password );
+    $username = strip_tags( sanitize_username( $username ));
+    $old_password = sanitize_password( $old_password );
     $password = sanitize_password( $password );
     $otpId = sanitize_otpId( $otpId );
     $otpValue = sanitize_otpValue( $otpValue );
@@ -451,10 +457,26 @@ function sanitize_login( string &$username, string &$password, string &$otpId, s
 }
 
 
-/**  SERVICE SANITIZATION  */
+/*  SERVICE SANITIZATION  */
 
+/**  Checks the parameters of the search are valid
+ * @param string $genre     genre of music[can be at maximum 10 chars]
+ * @param string $filter    Like-search to be applied on artist name or music name
+ * @param string $page      Page to be displayed[must be > 0 ]
+ * @throws LogException     In case of invalid parameters
+ */
+function check_search( string $genre, string $filter, string $page ){
 
-/**
+    if( !is_numeric( $page ) || $page < 0 || strlen( $genre ) > 10 || strlen( $filter ) > 25 )
+        throw new LogException(
+            [ 'SERVICE-ANALYSIS' ],
+            'SECURITY',
+            1,
+            'Found invalid parameters for search [Out of Client Request] -> [ ' . $genre . ':' . $filter . ':' . $page
+        );
+}
+/**  Sanitization of a file source. The function checks the source is present, and contained into the permitted
+ *   directory[defined into configuration]
  * Checks the given captchaValue is valid
  * Condition on captchaValue:
  *       - must be at most of 16 characters
@@ -470,39 +492,84 @@ function sanitize_source( string $src ): string{
         throw new LogException(
             [ 'XSS-ATTACK' ],
             'SECURITY',
-            10,
+            1,
             'Invalid source found into the database: ' . $src
         );
 
-    $src_sanitized = realpath( "../" . $src );
+    $src_canonical = realpath( "../" . $src );
 
-    if( $src_sanitized == false || strpos( $src_sanitized, $conf->general ) != 0 )
+    if( $src_canonical == false || strpos( $src_canonical, $conf->general ) != 0 )
         throw new LogException(
             [ 'XSS-ATTACK' ],
             'SECURITY',
-            10,
-            'Invalid source found into the database2: ' . $src
+            5,
+            'Invalid source found into the database: ' . $src_canonical
         );
 
     return $src;
 }
 
+/**
+ * @param  string $id    TransactionId to be checked
+ * @return string        The cleaned transactionID
+ * @throws LogException  In case the id is invalid
+ */
+function sanitize_transactionID( string $id ): string{
+
+    if( $id == null )
+        throw new LogException(
+            [ 'SERVICE-ANALYSIS' ],
+            'SECURITY',
+            1,
+            'Sanitization of transactionID failed. Missing field [Out of client Request]'
+        );
+
+    $pure_id = trim( str_replace( '"', "" , str_replace( "'", "", utf8_encode( $id ))));
+
+    if( $pure_id == null || strlen( $pure_id ) != 32 )
+        throw new LogException(
+            [ 'SERVICE-ANALYSIS' ],
+            'SECURITY',
+            1,
+            'Sanitization of otpID failed. Invalid length -> [' . $pure_id . ':' . strlen( $pure_id ) . ']'
+        );
+
+    if( !preg_match( '/^[a-zA-Z0-9]/', $pure_id ))
+        throw new LogException(
+            [ 'SERVICE-ANALYSIS' ],
+            'SECURITY',
+            1,
+            'Sanitization of otpID failed. Invalid characters found -> ' . $pure_id
+        );
+
+    return $pure_id;
+
+}
+
 /**  Checks the credit card information to prevent the sending of invalid request to the credit card gateway
  * @throws LogException  In case the information are not valid
  */
-function check_credit_card($cnn, $cvv, $name, $surname, $expire ){
+function check_credit_card( $cnn, $cvv, $name, $surname, $expire ){
+
+    if( $cnn == null || $cvv == null || $name == null || $surname == null || $expire == null )
+        throw new LogException(
+            [ 'SERVICE-ANALYSIS' ],
+            'SECURITY',
+            1,
+            'Missing some field of credit card. [Out of Client Request] -> [ ' . $cnn . ':' . $name . ':' . $surname . ':' . $expire . ']'
+        );
+
     $time = strtotime( $expire );
 
-    //$newformat = date('Y-m-d',$time);
     if( strlen($cvv) != 3 || strlen( $name ) == 0 || strlen( $surname ) == 0 || $time < time() )
         throw new LogException(
             [ 'USER-ERROR' ],
             'SECURITY',
             0,
-            'Invalid credit card. Invalid fields ['. $cnn . ':' . $cvv . ':' . $name . ':' . $surname . ':' . $expire . ']'
+            'Invalid credit card. Invalid fields ['. $cnn . ':' . $name . ':' . $surname . ':' . $expire . ']'
         );
 
-    luhn_check( $cnn ); //  checking if cnn has sense
+    luhn_check( $cnn ); //  checking if cnn is valid
 
 }
 
@@ -512,26 +579,31 @@ function check_credit_card($cnn, $cvv, $name, $surname, $expire ){
 function luhn_check($number){
 
     // Strip any non-digits (useful for credit card numbers with spaces and hyphens)
-    $number=preg_replace('/\D/', '', $number);
+    $number = preg_replace('/\D/', '', $number);
 
     // Set the string length and parity
-    $number_length=strlen($number);
-    $parity=$number_length % 2;
+    $number_length = strlen($number);
+    $parity = $number_length % 2;
 
     // Loop through each digit and do the maths
     $total=0;
-    for ($i=0; $i<$number_length; $i++) {
-        $digit=$number[$i];
+    for ($i=0; $i<$number_length; $i++){
+
+        $digit = $number[ $i ];
+
         // Multiply alternate digits by two
-        if ($i % 2 == $parity) {
+        if( $i % 2 == $parity ){
+
             $digit*=2;
             // If the sum is two digits, add them together (in effect)
-            if ($digit > 9) {
+            if ($digit > 9)
                 $digit-=9;
-            }
+
         }
+
         // Total up the digits
-        $total+=$digit;
+        $total += $digit;
+        
     }
 
     // If the total mod 10 equals 0, the number is valid

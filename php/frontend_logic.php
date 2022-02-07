@@ -1,8 +1,8 @@
 <?php
 
 session_start();
-include_once("sql_connector.php");
-include_once("security.php");
+include_once( "sql_connector.php" );
+include_once( "security.php" );
 
 try{
 
@@ -17,7 +17,7 @@ try{
                     sanitize_login(
                         $_POST[ 'username' ],
                         $_POST[ 'password' ],
-                        $_POST[ 'otp-id' ],
+                           $_POST[ 'otp-id' ],
                         $_POST[ 'otp-value' ]
                     );
 
@@ -57,9 +57,7 @@ try{
                     sanitize_registration(
                         $_POST[ 'username' ],
                         $_POST[ 'password' ],
-                        $_POST[ 'phone' ],
-                        $_POST[ 'captcha-id' ],
-                        $_POST[ 'captcha-value' ]
+                          $_POST[ 'phone' ]
                     );
 
                     //  caching registration information for activation phase[only after that will be stored]
@@ -128,35 +126,40 @@ try{
             case 'change_password':
 
                 //  checking all the message fields are present
-                if( isset( $_POST["username"], $_POST["password"], $_POST["old-password"], $_POST["otp-id"], $_POST["otp-value"] )){
+                if( isset( $_POST[ 'username' ], $_POST[ 'password' ], $_POST[ 'old-password' ], $_POST[ 'otp-id' ], $_POST[ 'otp-value' ])){
 
                     //  sanitization of tainted data and check of registration cached information presence
                     sanitize_password_change(
-                        $_POST["username"],
-                        $_POST["password"],
-                           $_POST["old-password"],
-                           $_POST["otp-id"],
-                         $_POST["otp-value"]
+                           $_POST[ 'username' ],
+                        $_POST[ 'old-password' ],
+                           $_POST[ 'password' ],
+                              $_POST[ 'otp-id' ],
+                           $_POST[ 'otp-value' ]
                     );
 
                     //  verification of otp session information presence and eventual check
-                    check_otp( $_POST["otp-id"], $_POST["otp-value"] );
+                    check_otp( $_POST[ 'otp-id' ], $_POST[ 'otp-value' ]);
 
                     //  change of the password
                     $mySqlConnection = new sqlconnector();
-                    if( !$mySqlConnection->changePassword( $_POST[ "username" ], $_POST[ "old-password" ], $_POST[ "password" ]))
+
+                    //  verification of credentials
+                    $result = $mySqlConnection->login( $_POST['username'], $_POST['old-password'] );
+
+                    //  application of the new password
+                    if( !$mySqlConnection->changePassword( $result[ 'uID' ], $_POST[ 'password' ]))
                         throw new LogException(
                             [ 'INTERNAL-ERROR' ],
                             'FRONTEND-LOGIC',
                             2,
-                            'Unable to change user ' . $_POST[ "username" ] . " password"
+                            'Unable to change user ' . $_POST[ 'username' ] . ' password'
                         );
                 }else
                     throw new LogException(
                         [ 'SERVICE-ANALYSIS' ],
                         'FRONTEND-LOGIC',
                         7,
-                        'Bad Password Change Request missing request fields[Out of client Request]'
+                        'Bad Password Change Request missing request fields [Out of client Request]'
                     );
                 break;
 
@@ -165,7 +168,7 @@ try{
                     [ 'SERVICE-ANALYSIS' ],
                     'FRONTEND-LOGIC',
                     8,
-                    'Bad General Request invalid field "type"[Out of client Request]'
+                    'Bad General Request invalid field "type" [Out of client Request]'
                 );
         }
     }else
@@ -177,6 +180,10 @@ try{
         );
 
 }catch( LogException $e ){
+
     writeLog( $e );
+    http_response_code( 400 );
+
+}catch( Exception $e ){
     http_response_code( 400 );
 }

@@ -18,14 +18,14 @@
     <div class="form-container sign-up-container" id="right-panel">
         <form action="#" id="registration-form">
             <h1>Sign Up</h1>
-            <input autocomplete="off" type="text" pattern="[A-Za-z0-9]{8,30}" name="username" placeholder="Username" />
+            <input autocomplete="off" type="text" pattern="[A-Za-z0-9]{5,20}" name="username" placeholder="Username" />
             <input autocomplete="off"  type="text" pattern="[0-9]{10}" name="phone" placeholder="Phone Number" />
             <div class="form-line">
-                <input autocomplete="new-password" type="password"  pattern="^[\s\S]{8,30}" name="password" placeholder="Password" />
+                <input autocomplete="new-password" type="password"  name="password" placeholder="Password" />
                 <img class="password-strength-show" src="img/strength_1.png" />
             </div>
 
-            <input autocomplete="off" id="passwordRepeater" type="password"  pattern="^[\s\S]{8,30}"  name="password-repeat" placeholder="Repeat Password" />
+            <input autocomplete="off" id="passwordRepeater" type="password" name="password-repeat" placeholder="Repeat Password" />
             <button id="sign-up-request" >Sign Up</button>
             <p id="registration-show" class="response-show"></p>
         </form>
@@ -49,8 +49,6 @@
                 <input class="hidden-input" type="hidden" name="password">
                 <input class="hidden-input" type="hidden" name="phone">
                 <input class="hidden-input" type="hidden" name="type">
-                <input class="hidden-input" type="hidden" name="captcha-id">
-                <input class="hidden-input" type="hidden" name="captcha-value">
                 <input class="hidden-input" type="hidden" name="otp-id">
                 <div>
                     <button class="undo-otp-button">Undo</button>
@@ -63,20 +61,21 @@
         <div id="login-panel">
             <form action="#" id="login-form">
                 <h1>Sign in</h1>
-                <input autocomplete="off" type="text" pattern="[A-Za-z0-9]{8,30}" name="username" placeholder="Username" />
-                <input autocomplete="new-password" pattern="^[\s\S]{8,30}" type="password" name="password" placeholder="Password" />
+                <input autocomplete="off" type="text" pattern="[A-Za-z0-9]{5,20}" name="username" placeholder="Username" />
+                <input autocomplete="new-password" type="password" name="password" placeholder="Password" />
                 <a href="#" id="password-linkout">Forgot your password?</a>
                 <button id="signIn-linkout">Sign In</button>
                 <p id="login-show" class="response-show"></p>
             </form>
             <form action="#" id="password-form">
                 <h1>Change Password</h1>
-                <input autocomplete="off" type="text" pattern="[A-Za-z0-9]{8,30}" name="username" placeholder="Username" />
+                <input autocomplete="off" type="text" pattern="[A-Za-z0-9]{5,20}" name="username" placeholder="Username" />
+                <input autocomplete="off" type="password" name="old-password" placeholder="Current Password" />
                 <div class="form-line">
-                    <input autocomplete="new-password" pattern="^[\s\S]{8,30}"  type="password" name="password" placeholder="Password" />
+                    <input autocomplete="new-password"  type="password" name="password" placeholder="New Password" />
                     <img class="password-strength-show" src="img/strength_1.png" />
                 </div>
-                <input autocomplete="off" id="passwordRepeaterLeft" pattern="^[\s\S]{8,30}"  type="password" name="password-repeat" placeholder="Repeat Password" />
+                <input autocomplete="off" id="passwordRepeaterLeft" type="password" name="password-repeat" placeholder="Repeat Password" />
                 <div>
                     <button id="password-back" class="password-back-button">Back</button>
                     <button id="password-request">Request</button>
@@ -103,8 +102,7 @@
                 <input class="hidden-input" type="hidden" name="type">
                 <input class="hidden-input" type="hidden" name="username">
                 <input class="hidden-input" type="hidden" name="password">
-                <input class="hidden-input" type="hidden" name="captcha-id">
-                <input class="hidden-input" type="hidden" name="captcha-value">
+                <input class="hidden-input" type="hidden" name="old-password">
                 <input class="hidden-input" type="hidden" name="otp-id">
                 <div>
                     <button class="undo-otp-button">Back</button>

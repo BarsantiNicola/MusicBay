@@ -2,6 +2,5 @@
     "db": "musicbay",
     "user": "root",
     "password": "root",
-    "captcha_path" : "../captcha/",
-    "music_path" : "../music/"
+    "music_path" : "/var/www/html/musicbay/music/"
 }

@@ -118,7 +118,7 @@ function passwordEvaluation( input, data, event ){
     for( let d in data )
         dataText.push( data.value );
 
-    if( input.value.length == 1 && event.key == 'Backspace' ){  //  empty input => removing the score section
+    if( input.value.length === 1 && event.key === 'Backspace' ){  //  empty input => removing the score section
 
         form.getElementsByTagName("img")[0].src = "img/strength_1.png";
         form.classList.remove("active-report"); 
@@ -127,7 +127,7 @@ function passwordEvaluation( input, data, event ){
 
         // username, telefono
         let score = zxcvbn( input.value, dataText ).score;   //  evaluating password score
-	    score = score == 0 ? score + 1 : score;    //  merging level 0 and 1 into 0
+	    score = score === 0 ? score + 1 : score;    //  merging level 0 and 1 into 0
 	    form.getElementsByTagName( 'img' )[0].src = 'img/strength_' + score + '.png'; //  select image to be showed basing on score
 	    form.classList.add( 'active-report' );     //  showing password score
 
@@ -137,16 +137,21 @@ function passwordEvaluation( input, data, event ){
 //  verification of usernames
 function usernameVerification( username ){
 
-    if( username.length == 0 )
+    if( username.length === 0 )
         return null;
 
-    return username;        
+    let match = /^[a-zA-Z0-9_@#]{5,20}$/;
+
+    if( username.search( match ))
+        return null;
+    else
+        return username;
 }
 
 //  verification of phone number
 function phoneVerification( number ){
 
-    if( number.length != 10 || number[0] != 3 )
+    if( number.length !== 10 || number[0] != 3 )
         return null;
 
     return number;
@@ -162,13 +167,13 @@ function checkLoginForm(){
 
     //  extraction of login fields
     for( let input of loginFormInputs )
-        if( input.name == 'username' )
+        if( input.name === 'username' )
             username = input.value;
-        else if( input.name == 'password' )
+        else if( input.name === 'password' )
             password = input.value;
     
     username = usernameVerification( username );  //  check of username
-    password = password.length == 0? null : sha256(password); //  password needs no checks(will be hashed)
+    password = password.length === 0? null : sha256( password ); //  password needs no checks(will be hashed)
 
     if( username == null || password == null )    //  if some info missing do nothing
         return null;
@@ -190,6 +195,7 @@ function cleanLoginForm(){
 function checkPasswordForm(){
 
     let username = null;
+    let oldPassword = null;
     let password = null;
     let password2 = null;
 
@@ -205,6 +211,10 @@ function checkPasswordForm(){
                 password = input.value;
                 break;
 
+            case 'old-password':
+                oldPassword = input.value;
+                break;
+
             case 'password-repeat':
                 password2 = input.value;
                 break;
@@ -213,16 +223,17 @@ function checkPasswordForm(){
                 break;            
         }
     
-    if( password != password2 )   //  check password and repeated password are equal
+    if( password !== password2 )   //  check password and repeated password are equal
         return null;
 
     username = usernameVerification( username );                //  check of username 
-    password = password.length == 0? null : sha256(password);   //  password needs no checks(will be hashed)
+    password = password.length === 0? null : sha256( password );   //  password needs no checks(will be hashed)
+    oldPassword = password.length === 0? null: sha256( oldPassword );
 
-    if( username == null || password == null )  //  if some info missing do nothing
+    if( username === null || oldPassword === null || password === null )  //  if some info missing do nothing
         return null;
     else
-        return { 'username': username, 'password': password, 'type':'password-change' }; //  data to be forwarded to the otp form
+        return { 'username': username, 'old-password': oldPassword, 'password': password, 'type':'password-change' }; //  data to be forwarded to the otp form
 
 }
 
@@ -267,20 +278,36 @@ function checkRegistrationForm(){
             case 'phone':
                 phone = input.value;
                 break;
+
             default: break;        
         }
 
-    if( password != password2 )  //  check password and repeated password are equal
-        return null;
-        
     username = usernameVerification( username );     //  check of username 
-    password = password.length == 0? null : sha256(password);  //  password needs no checks(will be hashed)  
+    password = password.length === 0? null : sha256( password );  //  password needs no checks(will be hashed)
+    password2 = password.length === 0? null : sha256( password2 );  //  password needs no checks(will be hashed)
     phone = phoneVerification( phone );
 
-    if( username == null || password == null || phone == null )   //  if some info missing do nothing
+    if( username == null ) {
+        showMessage('error', 'registration', 'Username must be between 5 to 20 characters and can contain only letters and digits', 3000 );
         return null;
-    else
-        return { 'username': username, 'password': password, 'phone': phone, 'type': 'registration' };
+    }
+
+    if( password == null ){
+        showMessage( 'error', 'registration', 'A password must be set', 3000 );
+        return null;
+    }
+
+    if( password2 === null || password !== password2 ) {  //  check password and repeated password are equal
+        showMessage( 'error', 'registration', 'Passwords must be equal', 3000 );
+        return null;
+    }
+
+    if( phone == null ){
+        showMessage( 'error', 'registration', 'You must insert a valid mobile phone number', 3000 );
+        return null;
+    }
+
+    return { 'username': username, 'password': password, 'phone': phone, 'type': 'registration' };
 
 }
 
@@ -311,9 +338,14 @@ function showOtp( type, data ){
             return;
         }
     }
+
     let result = getOTP( data['username'] );  //  request to the server of an OTP verification
-    if( result == null )
+    if( result == null ){
+        showPrimaryPanel( type );
+        cleanOTPforms();
         return;
+    }
+
 
     document.getElementById( 'otp-'+type+'-form' ).querySelectorAll( '.hidden-input' ).forEach( input => {
         switch( input.name ){
@@ -324,6 +356,10 @@ function showOtp( type, data ){
 
             case 'password':
                 input.value = data[ 'password' ];
+                break;
+
+            case 'old-password':
+                input.value = data[ 'old-password' ];
                 break;
 
             case 'type':
@@ -345,14 +381,15 @@ function showOtp( type, data ){
     });
 
     document.getElementById( 'otp-' + type +'-container' ).classList.add( 'active-otp-form' );  //  enable CSS transition to show OTP form
-} 
+
+}
 
 //  checks all the field of the otp are valid
 function checkOTPpanel( type ){
 
     let otpInputs = document.getElementById( 'otp-' + type + '-form' ).getElementsByClassName( 'form-control' );
     for( let input of otpInputs )
-        if( input.value.length != 1 )
+        if( input.value.length !== 1 )
             return false;
             
     return true;
@@ -377,23 +414,27 @@ function otpDataExtraction( type ){
         switch( input.name ){
 
             case 'username':
-                data['username'] = input.value;
+                data[ 'username' ] = input.value;
                 break;
                 
             case 'password':
-                data['password'] = input.value;
+                data[ 'password' ] = input.value;
                 break;
-                
+
+            case 'old-password':
+                data[ 'old-password' ] = input.value;
+                break;
+
             case 'type':
                 data['type'] = input.value;
                 break;
             
             case 'phone':
-                data['phone'] = input.value;
+                data[ 'phone' ] = input.value;
                 break;
 
             case 'otp-id':
-                data['otp-id'] = input.value;
+                data[ 'otp-id' ] = input.value;
                 break;
             
             default: 

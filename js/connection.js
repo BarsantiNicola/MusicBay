@@ -44,12 +44,15 @@ function getOTP( username ){
 
         type: "POST",
         url: 'php/otp_logic.php',
-        data:{ "type": "named", "username": username },
+        data:{ "username": username },
         async: false,
         success: function( data ){
+
             value = data.substr(1);
+
         },
         error: function(){
+
             value = null;
         }
     });
@@ -145,7 +148,7 @@ function activateUser( username, otpID, otpValue ){
 }
 
 //  Change the user's password
-function changePassword( username, passwordHash, captchaID, captchaValue, otpID, otpValue ){
+function changePassword( username, oldPasswordHash, passwordHash, otpID, otpValue ){
 
     let value = null;
 
@@ -157,8 +160,7 @@ function changePassword( username, passwordHash, captchaID, captchaValue, otpID,
             "type": "change_password",
             "username": username,
             "password": passwordHash,
-            "captcha-id" : captchaID,
-            "captcha-value": captchaValue,
+            "old-password": oldPasswordHash,
             "otp-id": otpID,
             "otp-value": otpValue
         },
@@ -327,26 +329,9 @@ function makePayment( transactionId ){
     return value;
 }
 
-function downloadSong( songID, songTitle ){
+function downloadSong( songID ){
 
-    $.ajax({
-
-        type: "POST",
-        url: 'php/service_logic.php',
-        data:{
-            "type": "download",
-            "song-id": songID
-        },
-        async: true,
-        success: function(data) {
-
-            let blob=new Blob([data]);
-            let link=document.createElement('a');
-            link.href=window.URL.createObjectURL(blob);
-            link.download=songTitle + ".mp3";
-            link.click();
-        },
-    });
+    document.location.assign('php/service_logic.php?type=download&song-id=' + songID );
 
 }
 

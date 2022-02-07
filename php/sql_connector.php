@@ -33,6 +33,7 @@ class sqlconnector{
             sqlconnector::$conf->password,
             sqlconnector::$conf->db
         );
+
     }
 
     /**
@@ -83,14 +84,14 @@ class sqlconnector{
      *
      * @param  string $username  Username by which performing the login
      * @param  string $password  Password associated with the username
-     * @throws LogException      If the system is unable to execute the request
+     * @throws LogException      If the system is unable to execute the request or the credentials are invalid
      * @return array             Return an array containing the userID and the phone of the user(sanitized)
      */
     public function login( string $username, string $password ): array{
 
         try {
 
-            $stmt = $this->connection->prepare( 'SELECT userid, phone FROM users WHERE username = ? AND password = ?' );
+            $stmt = $this->connection->prepare( 'SELECT userid, phone FROM users WHERE BINARY(username) = ? AND password = ?' );
             $stmt->bind_param( "ss", $username, $password );
 
             if( $stmt->execute() ){
@@ -137,26 +138,17 @@ class sqlconnector{
     }
 
     /**  Performs the change of the user password if the oldPassword match
-     * @param  string $username      Name of the username to which change the password
-     * @param  string $old_password  Old password of the user
+     * @param  int    $userID        Id of the user in which apply the password change
      * @param  string $password      New password to be set
      * @throws LogException          If the system is unable to execute the request
      * @return bool                  Returns true in case of success otherwise false
      */
-    public function changePassword( string $username, string $old_password, string $password ): bool{
-
-        if( !$this->login( $username, $old_password ))
-            throw new LogException(
-                [ 'USER-ERROR', 'BRUTE-FORCE' ],
-                'SQL-CONNECTOR',
-                3,
-                'Invalid change password. Old password not matching for user ' . $username
-            );
+    public function changePassword( int $userID, string $password ): bool{
 
         try {
 
-            $stmt = $this->connection->prepare( 'UPDATE users SET password=? WHERE username=?' );
-            $stmt->bind_param( "ss", $password, $username );
+            $stmt = $this->connection->prepare( 'UPDATE users SET password=? WHERE userid=?' );
+            $stmt->bind_param( "si", $password, $userID );
 
             $result = $stmt->execute();
 
@@ -507,14 +499,14 @@ class sqlconnector{
             }
 
             $stmt->close();
-            if ($phone == null || strlen($phone) == 0)
+            if ( $phone == null || strlen( $phone ) == 0)
                 throw new LogException(
                     [ 'SERVICE-ANALYSIS', 'BRUTE-FORCING', 'USER-ERROR' ],
                     'SQL-CONNECTOR',
                     1,
                     'Invalid phone number request. User ' . $username . ' not present'
                 );
-            return $phone;
+            return sanitize_phone( strip_tags( $phone ));
 
         }catch( LogException $e ){
 

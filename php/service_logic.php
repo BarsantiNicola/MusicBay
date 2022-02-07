@@ -62,7 +62,11 @@ function get_cart(): array{
 
 try {
 
-    if( !isset( $_POST[ 'type' ])) //  every message must have the 'type' field
+    if( isset( $_GET[ 'type' ]))
+        $type = $_GET[ 'type' ];
+    elseif ( isset( $_POST[ 'type' ]))
+        $type = $_POST[ 'type' ];
+    else
         throw new LogException(
             [ 'SERVICE-ANALYSIS' ],
             'SERVICE-LOGIC',
@@ -74,15 +78,7 @@ try {
     //  otherwise a brute force of session id can be used to randomly logout users
     check_authentication();
 
-    switch( $_POST[ 'type' ]) {
-
-        case 'logout':
-            session_destroy();
-            unset( $_COOKIE[ 'auth' ]);   //  manual clean of cookie
-            setcookie( 'auth', '', time() - 3600, '/' ); // empty value and old timestamp -> browser drops cookie from memory
-
-            header( "index.php", true, 301 );  //  redirection to the login page
-            exit();
+    switch( $type ) {
 
         case 'default_search':    //  search inside user's bought songs
 
@@ -90,6 +86,8 @@ try {
             if( isset( $_POST[ 'page' ]) && is_numeric( $_POST[ 'page' ]) && $_POST[ 'page' ] > -1 ){
 
                 $connector = new sqlconnector(); //  connection with the database
+
+                //  user-id already checked by check_authentication[line 75]
                 echo json_encode( $connector->getMusic( 'default_search', $_SESSION[ 'user-id' ], '', '', $_POST[ 'page' ]));
 
             }else
@@ -106,9 +104,11 @@ try {
             //  parameters existence check
             if( isset( $_POST[ 'genre' ], $_POST[ 'filter' ], $_POST[ 'page' ])) {
 
+                check_search( $_POST[ 'genre' ], $_POST[ 'filter' ], $_POST[ 'page' ] );
+
                 $connector = new sqlconnector();  //  connection with the database
 
-                //  user-id checked into check_authentication()[ line 87 ]
+                //  user-id checked into check_authentication()[ line 75 ]
                 echo json_encode( $connector->getMusic( 'search', $_SESSION[ 'user-id' ], $_POST[ 'filter' ], $_POST[ 'genre' ], $_POST[ 'page' ]));
 
             }else
@@ -155,6 +155,7 @@ try {
 
         case 'order':
 
+            //  parameters presence check
             if( !isset( $_POST[ 'CCN' ], $_POST[ 'CVV' ], $_POST[ 'name' ], $_POST[ 'surname' ], $_POST[ 'card-expire' ] ))
                 throw new LogException(
                     [ 'SERVICE-ANALYSIS' ],
@@ -163,6 +164,7 @@ try {
                     'Bad [ORDER] Request. Missing some credit card data [Out of client Request]'
                 );
 
+            //  checking credit card information
             check_credit_card( $_POST[ 'CCN' ], $_POST[ 'CVV' ], $_POST[ 'name' ], $_POST[ 'surname' ], $_POST[ 'card-expire' ] );
 
             $cart = get_cart();
@@ -193,9 +195,11 @@ try {
                 //  extraction of titles and total price for user confirm advertisement
                 $price = 0;
                 $songs = [];
-                foreach( $cart as $song ) {
+                foreach( $cart as $song ){
+
                     $price += $song['price'];
                     $songs[] = $song[ 'title' ];
+
                 }
 
                 echo json_encode([
@@ -212,104 +216,136 @@ try {
                     'Bad [ORDER] Request. No elements into the cart [Out of client Request]'
                 );
             break;
-                
-            case 'buy':
-                if( !isset( $_POST[ 'transactionID' ], $_SESSION[ 'order' ]))
-                    throw new LogException(
-                        [ 'SERVICE-ANALYSIS' ],
-                        'SERVICE-LOGIC',
-                        1,
-                        'Bad [BUY]. Missing request field[Out of client Request]'
+
+        case 'buy':
+
+            //  parameters presence check
+            if( !isset( $_POST[ 'transactionID' ], $_SESSION[ 'order' ]))
+                throw new LogException(
+                    [ 'SERVICE-ANALYSIS' ],
+                    'SERVICE-LOGIC',
+                    2,
+                    'Bad [BUY]. Missing request field[Out of client Request]'
+                );
+
+            //  checking transactionID is valid[32 bytes + only digits and chars]
+            $pure_id = sanitize_transactionID( $_POST[ 'transactionID' ]);
+
+            //  checking transactionID is equal to the one stored during the order
+            if( strncmp( $_SESSION[ 'order' ][ 'transactionId' ], $pure_id, 32 ) != 0 )
+                throw new LogException(
+                    [ 'SERVICE-ANALYSIS' ],
+                    'SERVICE-LOGIC',
+                    2,
+                    'Bad [BUY]. Invalid transactionID, not matching current order[ ' . $_SESSION[ 'order' ][ 'transactionId' ] . ':' . $pure_id . ']'
+                );
+
+            //  checking the transactionID has not been used from the time of the order and its usage[TOCTOU]
+            $connection = new sqlconnector();
+            if( $connection->checkTransaction( $pure_id ))
+                throw new LogException(
+                    [ 'SERVICE-ANALYSIS' ],
+                    'SERVICE-LOGIC',
+                    2,
+                    'Bad payment request. Transaction id already present ' . $pure_id
+                );
+
+            //  verification order is not too old
+            if( $_SESSION[ 'order' ][ 'transaction-expire' ] > time() ){
+
+                $cart = $_SESSION[ 'order' ][ 'cart' ];
+
+                //  user-id checked into check_authentication()[ line 75 ]
+                foreach( $cart as $song ){
+
+                    $connection->addPayment(
+                        $_SESSION[ 'order' ][ 'transactionId' ],
+                        $_SESSION[ 'user-id' ],
+                        $song[ 'song-id' ],
+                        $song[ 'price' ],
+                        $_SESSION[ 'order' ][ 'CCN' ],
+                        $_SESSION[ 'order' ][ 'name' ],
+                        $_SESSION[ 'order' ][ 'surname' ]
                     );
+                    remove_cart( $song[ 'song-id' ] );
 
-                //  verification order is not too old
-                if( $_SESSION[ 'order' ][ 'transaction-expire' ] > time() ){
+                }
 
-                    $cart = $_SESSION[ 'order' ][ 'cart' ];
-
-                    $connection = new sqlconnector();
-                    //  user-id checked into check_authentication()[ line 87 ]
-                    foreach( $cart as $song ){
-                            $connection->addPayment(
-                                $_POST[ 'transactionID' ],
-                                $_SESSION[ 'user-id' ],
-                                $song[ 'song-id' ],
-                                $song[ 'price' ],
-                                $_SESSION[ 'order' ][ 'CCN' ],
-                                $_SESSION[ 'order' ][ 'name' ],
-                                $_SESSION[ 'order' ][ 'surname' ]
-                            );
-                            remove_cart( $song[ 'song-id' ] );
-                    }
-                }else
-                    throw new LogException(
-                        [ 'SERVICE-ANALYSIS' ],
-                        'SERVICE-LOGIC',
-                        1,
-                        'Bad [BUY] Request. Order expired by ' . (time() - $_SESSION[ 'order' ][ 'transaction-expire' ]) . '. Transaction aborted'
-                    );
-                break;
-
-            case 'download':
-
-                if( !isset( $_POST[ 'song-id' ]))
-                    throw new LogException(
-                        [ 'SERVICE-ANALYSIS' ],
-                        'SERVICE-LOGIC',
-                        9,
-                        'Bad Buy Request. Missing songID[Out of client Request]'
-                    );
-
-                $connection = new sqlconnector();
-                //  user-id checked into check_authentication()[ line 87 ]
-                $songTitle = $connection->checkSong( $_SESSION[ 'user-id' ], $_POST[ 'song-id' ]);
-                $filename = exposeData( 'song', $songTitle );
-
-                if( file_exists( $filename )){
-
-                    //Get file type and set it as Content Type
-                    $finfo = finfo_open( FILEINFO_MIME_TYPE );
-                    header('Content-Type: ' . finfo_file( $finfo, $filename ));
-                    finfo_close( $finfo );
-
-                    //Use Content-Disposition: attachment to specify the filename
-                    header( 'Content-Disposition: attachment; filename=' . basename( $filename ));
-
-                    //No cache
-                    header( 'Expires: 0' );
-                    header( 'Cache-Control: must-revalidate' );
-                    header( 'Pragma: public' );
-
-                    //Define file size
-                    header( 'Content-Length: ' . filesize( $filename ));
-
-                    ob_clean();
-                    flush();
-                    readfile( $filename );
-
-                }else
-                    throw new LogException(
-                        [ 'INTERNAL ERROR' ],
-                        'SERVICE-LOGIC',
-                        0,
-                        'Bad [DOWNLOAD] Request. Specified song ' . $filename. ' not present'
-                    );
-                break;
-
-            default:
+            }else
                 throw new LogException(
                     [ 'SERVICE-ANALYSIS' ],
                     'SERVICE-LOGIC',
                     1,
-                    'Bad Request invalid field "type"[Out of client Request]'
+                    'Bad [BUY] Request. Order expired by ' . (time() - $_SESSION[ 'order' ][ 'transaction-expire' ]) . '. Transaction aborted'
                 );
-        }
+            break;
+
+        case 'download':
+
+            //  parameter check[ existence + sanitization ]
+            if( !isset( $_GET[ 'song-id' ]) || !is_numeric( $_GET[ 'song-id' ]) || $_GET[ 'song-id' ] < 0 )
+                throw new LogException(
+                    [ 'SERVICE-ANALYSIS' ],
+                    'SERVICE-LOGIC',
+                    1,
+                    'Bad [DOWNLOAD] Request. Missing or invalid songID [Out of client Request]'
+                );
+
+            $connection = new sqlconnector();
+
+            //  checking the user has bought the song
+            //  user-id checked into check_authentication()[ line 75 ]
+            $songTitle = $connection->checkSong( $_SESSION[ 'user-id' ], $_GET[ 'song-id' ]);
+            $filename = get_file( $songTitle );
+
+            //  get file type and set it as Content Type
+            header('Content-type: audio/mpeg');
+            header("Content-Transfer-Encoding: Binary");
+
+            //  use Content-Disposition: attachment to specify the filename
+            header( 'Content-Disposition: attachment; filename="' . basename( $filename ).'"' );
+
+            //  no cache
+            header( 'Expires: 0' );
+            header( 'Cache-Control: must-revalidate' );
+            header('Pragma: no-cache');
+
+            //  define file size
+            header( 'Content-Length: ' . filesize( $filename ));
+
+            ob_clean();
+
+            readfile( $filename );
+            flush();
+            break;
+
+        case 'logout':
+            session_destroy();
+            unset( $_COOKIE[ 'auth' ]);   //  manual clean of cookie
+            setcookie( 'auth', '', time() - 3600, '/' ); // empty value and old timestamp -> browser drops cookie from memory
+
+            header( "index.php", true, 301 );  //  redirection to the login page
+            break;
+
+        default:
+            throw new LogException(
+                [ 'SERVICE-ANALYSIS' ],
+                'SERVICE-LOGIC',
+                1,
+                'Bad Request invalid field "type"[Out of client Request]'
+            );
+    }
+
+    exit();
 
 
 }catch( LogException $e ){
 
-    echo json_encode( $e->getMessage() );
+    /*session_destroy();
+    unset( $_COOKIE[ 'auth' ]);   //  manual clean of cookie
+    setcookie( 'auth', '', time() - 3600, '/' ); // empty value and old timestamp -> browser drops cookie from memory
+
+    header( "index.php", true, 301 );  //  redirection to the login page*/
     writeLog( $e );
-    http_response_code( 400 );
 
 }
