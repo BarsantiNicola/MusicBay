@@ -294,7 +294,7 @@ function launchSingleOTP( inputs, button ){
 
 		//  each input of the otp is managed by a different eventListener
     	inputs[i].addEventListener( 'keydown', function( event ){
-			alert( button );
+
 			//  DEL button for moving left on the OTP removing data
       		if( event.key === 'Backspace' ) {
 
@@ -342,18 +342,25 @@ function PasswordEvaluationLoad(){
 function singlePasswordEvaluationLoad(inputs, type){
 
 	let data = [];
-	for( let i = 0; i< inputs.length; i++ ){
+	for( let i = 0; i< inputs.length; i++ )
 		switch( inputs[i].name ){
+
 			case "username":
 				data.push( inputs[i] );
 				break;
+
 			case "phone":
 				data.push( inputs[i] );
 				break;
+
+			case "old-password":
+				data.push( inputs[i] );
+				break;
+
 			default:
 				break;
 		}
-	}
+
 
 	for( let i = 0; i < inputs.length; i++ ){
 
@@ -364,11 +371,13 @@ function singlePasswordEvaluationLoad(inputs, type){
 				if( event.key === "Backspace" && inputs[i].value === '' && i>0 ){
 					inputs[i-1].focus();
 					event.preventDefault();
+					passwordEvaluation( inputs[i], data, event );  //  checking password with zxcvbn
 					return;
 				}else
-					if( event.key === "Backspace" )  //  just deleting input, leaving the management to event.default
+					if( event.key === "Backspace" ) {  //  just deleting input, leaving the management to event.default
+						passwordEvaluation( inputs[i], data, event );  //  checking password with zxcvbn
 						return;
-
+					}
 				passwordEvaluation( inputs[i], data, event );  //  checking password with zxcvbn
 
 				if( event.key === "Enter" ){  //  input management(move forward on inputs or on the button)

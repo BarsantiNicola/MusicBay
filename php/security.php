@@ -234,7 +234,7 @@ function sanitize_username( string $username ): string{
  */
 function sanitize_password( string $password ): string{
 
-    if( $password == null || strlen( $password ) != 64 )
+    if( $password == null || strlen( $password ) == 0 )
         throw new LogException(
             [ 'SERVICE-ANALYSIS' ],
             'SECURITY',
@@ -243,18 +243,7 @@ function sanitize_password( string $password ): string{
         );
 
     //  removing eventual garbage( quotes/spaces )
-    $text = trim( str_replace( '"', "" , str_replace( "'", "", utf8_encode( $password ))));
-
-    //  checking password is composed only by letters and digits[SHA-256 HASH]
-    if( !preg_match( '/^[a-zA-Z0-9]/', $text ))
-        throw new LogException(
-            [ 'SERVICE-ANALYSIS' ],
-            'SECURITY',
-            1,
-            'Sanitization of password failed. Invalid characters [Out of client Request] -> ' . $password
-        );
-
-    return $text;
+    return trim( str_replace( '"', "" , str_replace( "'", "", utf8_encode( $password ))));
 
 }
 

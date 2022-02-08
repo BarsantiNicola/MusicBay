@@ -56,6 +56,12 @@ class sqlconnector{
 
         try {
 
+            $options = [
+                'cost' => 12,
+            ];
+
+            $password = password_hash( $password, PASSWORD_BCRYPT, $options );
+
             //  uniqueness of user and phone number defined as mysql constraints
             $stmt = $this->connection->prepare( 'INSERT INTO users VALUES( NULL, ?, ?, ? )' );
             $stmt->bind_param( "sss", $username, $password, $phone );
@@ -90,12 +96,12 @@ class sqlconnector{
 
         try {
 
-            $stmt = $this->connection->prepare( 'SELECT userid, phone FROM users WHERE BINARY(username) = ? AND password = ?' );
-            $stmt->bind_param( "ss", $username, $password );
+            $stmt = $this->connection->prepare( 'SELECT userid, phone, password FROM users WHERE BINARY(username) = ?' );
+            $stmt->bind_param( "s", $username );
 
             if( $stmt->execute() ){
 
-                $stmt->bind_result( $uID, $phone );  //  only one result
+                $stmt->bind_result( $uID, $phone, $storedPassword );  //  only one result
                 $stmt->fetch();
                 $stmt->close();
 
@@ -104,10 +110,18 @@ class sqlconnector{
                         [ 'USER-ERROR', 'BRUTE-FORCING' ],
                         'SQL-CONNECTOR',
                         1,
-                        'Invalid login credentials. Login for user ' . $username . ' failed'
+                        'Invalid login credentials. User ' . $username . ' not present'
                     );
 
-                return [ 'uID' => sanitize_id( strip_tags( $uID )), 'phone' => sanitize_phone( strip_tags( $phone ))];
+                if( password_verify( $password, $storedPassword ))
+                    return [ 'uID' => sanitize_id( strip_tags( $uID )), 'phone' => sanitize_phone( strip_tags( $phone ))];
+                else
+                    throw new LogException(
+                        [ 'USER-ERROR', 'BRUTE-FORCING' ],
+                        'SQL-CONNECTOR',
+                        1,
+                        'Invalid login trial for ' . $username . '. Password not correct'
+                    );
 
             }else{
 
@@ -144,6 +158,12 @@ class sqlconnector{
     public function changePassword( int $userID, string $password ): bool{
 
         try {
+
+            $options = [
+                'cost' => 12,
+            ];
+
+            $password = password_hash( $password, PASSWORD_BCRYPT, $options );
 
             $stmt = $this->connection->prepare( 'UPDATE users SET password=? WHERE userid=?' );
             $stmt->bind_param( "si", $password, $userID );

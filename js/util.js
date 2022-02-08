@@ -115,8 +115,8 @@ function passwordEvaluation( input, data, event ){
 
 	const form = input.parentNode;
     let dataText = [];
-    for( let d in data )
-        dataText.push( data.value );
+    for( let a = 0; a<data.length; a++ )
+        dataText.push(data[a].value);
 
     if( input.value.length === 1 && event.key === 'Backspace' ){  //  empty input => removing the score section
 
@@ -173,7 +173,8 @@ function checkLoginForm(){
             password = input.value;
     
     username = usernameVerification( username );  //  check of username
-    password = password.length === 0? null : sha256( password ); //  password needs no checks(will be hashed)
+    if( password.length === 0 )
+        password = null;
 
     if( username == null || password == null )    //  if some info missing do nothing
         return null;
@@ -226,9 +227,12 @@ function checkPasswordForm(){
     if( password !== password2 )   //  check password and repeated password are equal
         return null;
 
-    username = usernameVerification( username );                //  check of username 
-    password = password.length === 0? null : sha256( password );   //  password needs no checks(will be hashed)
-    oldPassword = password.length === 0? null: sha256( oldPassword );
+    username = usernameVerification( username );                //  check of username
+    if( password.length === 0 )
+        password = null;
+
+    if( oldPassword.length === 0 )
+        oldPassword = null;
 
     if( username === null || oldPassword === null || password === null )  //  if some info missing do nothing
         return null;
@@ -282,9 +286,13 @@ function checkRegistrationForm(){
             default: break;        
         }
 
-    username = usernameVerification( username );     //  check of username 
-    password = password.length === 0? null : sha256( password );  //  password needs no checks(will be hashed)
-    password2 = password.length === 0? null : sha256( password2 );  //  password needs no checks(will be hashed)
+    username = usernameVerification( username );     //  check of username
+    if( password.length === 0 )
+        password = null;
+
+    if( password2.length === 0 )
+        password2 = null;
+
     phone = phoneVerification( phone );
 
     if( username == null ) {
