@@ -114,7 +114,8 @@ class sqlconnector{
                     );
 
                 if( password_verify( $password, $storedPassword ))
-                    return [ 'uID' => sanitize_id( strip_tags( $uID )), 'phone' => sanitize_phone( strip_tags( $phone ))];
+                    
+                    return [ 'uID' => sanitize_id( htmlspecialchars( $uID )), 'phone' => sanitize_phone( htmlspecialchars( $phone ))];
                 else
                     throw new LogException(
                         [ 'USER-ERROR', 'BRUTE-FORCING' ],
@@ -244,7 +245,7 @@ class sqlconnector{
                         'Invalid song check. The song ' . $songId . ' not found on user ' . $userId
                     );
 
-                return strip_tags( $title );
+                return htmlspecialchars( $title );
 
             } else
                 throw new LogException(
@@ -364,12 +365,12 @@ class sqlconnector{
                     }
 
                     $data[] = [
-                        'songID' => strip_tags( $musicID ),
-                        'title'  => strip_tags( $title ),
-                        'artist' => strip_tags( $artist ),
-                        'price'  => strip_tags( $price ),
-                        'song'   => sanitize_source( sqlconnector::$dataConf->demo . strip_tags( $song ), 'demo' ),
-                        'img'    => sanitize_source( sqlconnector::$dataConf->img . strip_tags( $pic ), 'img' )
+                        'songID' => htmlspecialchars( $musicID ),
+                        'title'  => htmlspecialchars( $title ),
+                        'artist' => htmlspecialchars( $artist ),
+                        'price'  => htmlspecialchars( $price ),
+                        'song'   => sanitize_source( sqlconnector::$dataConf->demo . htmlspecialchars( $song ), 'demo' ),
+                        'img'    => sanitize_source( sqlconnector::$dataConf->img . htmlspecialchars( $pic ), 'img' )
                     ];
                 }
             }
@@ -463,10 +464,10 @@ class sqlconnector{
                 );
 
             return [
-                'song-id' => strip_tags( $musicId ),
-                'title'   => strip_tags( $title ),
-                'artist'  => strip_tags( $artist ),
-                'price'   => strip_tags( $price )
+                'song-id' => htmlspecialchars( $musicId ),
+                'title'   => htmlspecialchars( $title ),
+                'artist'  => htmlspecialchars( $artist ),
+                'price'   => htmlspecialchars( $price )
             ];
 
         }catch( LogException $e ){
@@ -516,7 +517,7 @@ class sqlconnector{
                     'Invalid phone number request. User ' . $username . ' not present'
                 );
 
-            return sanitize_phone( strip_tags( $phone ));
+            return sanitize_phone( htmlspecialchars( $phone ));
 
         }catch( LogException $e ){
             throw $e;
